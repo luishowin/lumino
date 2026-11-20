@@ -4,7 +4,8 @@
   "private": true,
   "description": "A STEAM learning adventure platform for learners, parents, and guardians.",
   "scripts": {
-    "check": "node --input-type=module --check < app.js && node --check tutor/dialogue.mjs && node --check tutor/components.mjs && node --check sw.js",
+    "check": "node --input-type=module --check < app.js && node --check lumino-app/content.mjs && node --check lumino-app/pixel-art.mjs && node --check lumino-app/progress.mjs && node --check adventure/game.mjs && node --check adventure/levels.mjs && node --check adventure/art.mjs && node --check sw.js",
+    "test": "node --test",
     "start": "python3 -m http.server 4173"
   }
 }

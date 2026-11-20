@@ -1,7 +1,7 @@
 {
-  "name": "Lumino - Learning Adventure",
+  "name": "Lumino - STEAM Learning Adventure Platform",
   "short_name": "Lumino",
-  "description": "Learn by restoring a luminous world.",
+  "description": "Lumino is a STEAM learning adventure platform for learners, parents and guardians, with hands-on challenges and a planned learning resource center.",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#07131d",

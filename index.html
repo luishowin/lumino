@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#F2F2EF">
 <title>About Lumino</title>
-<meta name="description" content="Lumino is an early learning adventure where ideas become tools for repairing a hopeful world.">
+<meta name="description" content="Lumino is a STEAM learning adventure platform for learners, parents and guardians, with hands-on challenges and a planned learning resource center.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://luishowin.github.io/lumino/">
 <meta property="og:title" content="About Lumino">
-<meta property="og:description" content="Lumino is an early learning adventure where ideas become tools for repairing a hopeful world.">
+<meta property="og:description" content="Lumino is a STEAM learning adventure platform for learners, parents and guardians, with hands-on challenges and a planned learning resource center.">
 <meta property="og:image" content="https://luishowin.github.io/lumino/assets/lumino-preview.png">
 <meta property="og:image:width" content="928">
 <meta property="og:image:height" content="414">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="About Lumino">
-<meta name="twitter:description" content="Lumino is an early learning adventure where ideas become tools for repairing a hopeful world.">
+<meta name="twitter:description" content="Lumino is a STEAM learning adventure platform for learners, parents and guardians, with hands-on challenges and a planned learning resource center.">
 <meta name="twitter:image" content="https://luishowin.github.io/lumino/assets/lumino-preview.png">
 <link rel="icon" href="assets/lumino-favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="assets/lumino-favicon.png">
@@ -149,6 +149,7 @@
     line-height: 1.15; letter-spacing: -.01em;
   }
   .section-intro { margin: 0; max-width: 34rem; color: var(--charcoal-soft); }
+  .section-intro + .section-intro { margin-top: 1rem; }
   .section-intro + .accordion { margin-top: 2rem; }
 
   /* Accordion (native details/summary: keyboard and screen-reader support built in) */
@@ -183,13 +184,16 @@
 
   .status {
     margin-top: var(--section-gap);
+    display: flex;
+    align-items: center;
+    gap: clamp(.875rem, 3vw, 1.5rem);
     padding: clamp(1.75rem, 4vw, 2.5rem);
     background: var(--ash-deep);
-    border-left: 4px solid var(--banana);
     max-width: 44rem;
     font-family: var(--serif); font-size: clamp(1.125rem, 1rem + .5vw, 1.375rem);
     line-height: 1.55;
   }
+  .status-cue { flex: none; width: clamp(2.25rem, 7vw, 3.25rem); height: auto; }
 
   /* Footer */
   .site-footer {
@@ -231,11 +235,11 @@
 
 <div class="wrap">
   <header class="site-header reveal" style="--i:0">
-    <a class="brand" href="https://luishowin.github.io/lumino/" aria-label="Lumino home">
+    <a class="brand" href="./" aria-label="Lumino home">
       <span class="brand-mark" aria-hidden="true">L</span>
       <span class="brand-name">Lumino</span>
     </a>
-    <a class="pill" href="https://luishowin.github.io/lumino/">Try Lumino</a>
+    <a class="pill" href="lumino-app/">Try Lumino</a>
   </header>
 
   <main>
@@ -243,11 +247,10 @@
       <p class="hero-kicker reveal" style="--i:1">A world built on curiosity</p>
       <h1 class="reveal" style="--i:2">Learn something. Make something.</h1>
       <p class="hero-lede reveal" style="--i:3">
-        Lumino is an early learning adventure in which ideas become tools for repairing a hopeful world.
-        Winston guides learners through mathematics, physics, chemistry, biology and English, one considered challenge at a time.
+        Lumino is a STEAM learning adventure platform for learners, parents and guardians. Explore science, technology, engineering, arts and mathematics through workshop challenges. We’re building toward a learning resource center that helps families keep exploring together.
       </p>
       <div class="hero-actions reveal" style="--i:4">
-        <a class="text-link" href="https://luishowin.github.io/lumino/">Explore the prototype</a>
+        <a class="text-link" href="lumino-app/">Explore the prototype</a>
       </div>
     </section>
 
@@ -261,11 +264,23 @@
       </div>
     </section>
 
+    <section class="section" aria-labelledby="design-test">
+      <h2 id="design-test" class="reveal" style="--i:0">Design, test and revise</h2>
+      <div>
+        <p class="section-intro reveal" style="--i:1">
+          In a future workshop challenge, you could sketch two lantern layouts, test how much of a path each layout lights with the same number of power cells, and explain how your design helps people find their way. Then revise it using what you learned.
+        </p>
+        <p class="section-intro reveal" style="--i:2">
+          We want learners to bring that same judgment to AI-generated suggestions. Ask what a suggestion assumes, check it against evidence and decide what you would improve.
+        </p>
+      </div>
+    </section>
+
     <section class="section" aria-labelledby="find-path">
       <h2 id="find-path" class="reveal" style="--i:0">Find your path</h2>
       <div>
         <p class="section-intro reveal" style="--i:1">
-          Choose a subject and tell Winston which ideas already feel familiar.
+          The prototype starts with five subject maps that build skills for future STEAM challenges. Choose a subject and tell Winston which ideas already feel familiar.
           Lumino uses your answers to suggest a starting point, which you are free to adjust.
           Open a subject to see the level to expect and some of the topics it covers.
         </p>
@@ -316,7 +331,7 @@
           <details class="reveal" style="--i:1">
             <summary>What is Lumino?</summary>
             <div class="panel">
-              <p>Lumino is an early learning adventure. Learners work through short explanations and practical challenges that connect ideas to building and repairing things.</p>
+              <p>Lumino is a STEAM learning adventure platform. Today learners can explore five subjects through short explanations and workshop repairs. The planned resource center will help learners revisit concepts and give parents and guardians ideas for supporting learning at home.</p>
             </div>
           </details>
           <details class="reveal" style="--i:2">
@@ -328,7 +343,7 @@
           <details class="reveal" style="--i:3">
             <summary>How does a lesson work?</summary>
             <div class="panel">
-              <p>Every topic follows the same three steps: a short explanation, a hands-on workshop challenge, and a chance to recall what you learned.</p>
+              <p>Each starter topic gives you a short explanation, a workshop challenge and a chance to recall what you learned.</p>
             </div>
           </details>
           <details class="reveal" style="--i:4">
@@ -346,7 +361,7 @@
           <details class="reveal" style="--i:6">
             <summary>Is Lumino finished?</summary>
             <div class="panel">
-              <p>Not yet. Lumino is in early development, and more subjects, adventures and family features are planned.</p>
+              <p>The early prototype is available now. More learning activities and a resource center for learners, parents and guardians are planned.</p>
             </div>
           </details>
         </div>
@@ -354,13 +369,14 @@
     </section>
 
     <p class="status reveal" style="--i:0">
-      Lumino is in early development. More subjects, adventures and family features are planned.
+      <img class="status-cue" src="assets/lumino-fire-hydrant.webp" width="125" height="216" alt="">
+      <span>Lumino is in early development. The prototype is available to explore now.</span>
     </p>
   </main>
 
   <footer class="site-footer reveal" style="--i:0">
     <span>Lumino</span>
-    <a class="text-link" href="https://luishowin.github.io/lumino/">Try Lumino</a>
+    <a class="text-link" href="lumino-app/">Try Lumino</a>
   </footer>
 </div>
 

@@ -1,4 +1,4 @@
-const CACHE = "lumino-v6";
+const CACHE = "lumino-v7";
 const ASSETS = ["./", "./index.html", "./lumino-app/", "./lumino-app/index.html", "./learn.html", "./about.html", "./styles.css", "./landing.css", "./app.js", "./manifest.webmanifest", "./icons/lumino-mark.svg"];
 
 self.addEventListener("install", (event) => {

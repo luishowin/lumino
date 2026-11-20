@@ -1,38 +1,15 @@
 # Lumino
 
-Lumino is a hopeful, pixel-art physics-learning adventure for learners aged 13-16. Learners explore a sleeping industrial world, learn a force concept, and immediately apply it in a short platforming repair expedition.
-
-## Current MVP
-
-The first vertical slice is a five-quest forces course:
-
-1. Gravity
-2. Friction
-3. Mass and force
-4. Balanced forces
-5. Momentum and simple machines
-
-Each quest includes a concise repair brief, an interactive force-field prompt, a keyboard and touch-friendly platform challenge, a retrieval question, and a local-progress unlock. Lumino is IGCSE-aligned in its learning intent but is not affiliated with or endorsed by Cambridge International.
+Lumino is an early learning adventure where learners explore concepts and use them to repair a hopeful world. Winston is a scripted guide; the current prototype includes onboarding, confidence-based recommendations, five subject maps, and one short starter activity per subject.
 
 ## Run locally
 
-Lumino is dependency-free.
+Run `npm run check`, then `npm start` and open `http://localhost:4173`. The app uses browser-local storage and can work offline after its first successful load. The project introduction is at `about.html`.
 
-```bash
-npm run check
-npm start
-```
+The five activities are early prototypes and need educational review. The previous platforming prototype is available in the Git history; integrating subject-specific platform challenges remains future work. Accounts, payments, live AI, and full curricula are not implemented.
 
-Then open `http://localhost:4173` in a modern browser. Install it from the browser's install prompt where supported. Progress is stored only in the browser's local storage.
+## Assets and contributions
 
-## MVP boundaries
-
-This prototype intentionally excludes learner accounts, cloud syncing, payments, social features, multiplayer, AI tutoring, production combat systems, and the broader open world. It contains no learner data and no third-party visual assets.
-
-## Contributing
-
-Keep new material original, accessible, and appropriately licensed. Do not commit secrets, learner data, paid assets, copied reference art, or unreviewed curriculum claims. Changes to learning content should include a clear objective, an application challenge, and a retrieval check.
-
-## Licence
+The current visuals are temporary original placeholders. Only add assets with verified rights for public distribution. Do not commit secrets, learner data, internal documents, or unlicensed artwork. Learning content should include an objective, an application challenge, and a retrieval check.
 
 Released under the [MIT License](LICENSE).

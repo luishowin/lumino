@@ -1,5 +1,5 @@
-const CACHE = "lumino-v1";
-const ASSETS = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./icons/lumino-mark.svg"];
+const CACHE = "lumino-v2";
+const ASSETS = ["./", "./index.html", "./about.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./icons/lumino-mark.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));

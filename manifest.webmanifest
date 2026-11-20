@@ -1,7 +1,7 @@
 {
-  "name": "Lumino - Physics Adventure",
+  "name": "Lumino - Learning Adventure",
   "short_name": "Lumino",
-  "description": "Learn forces by restoring a luminous world.",
+  "description": "Learn by restoring a luminous world.",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#07131d",

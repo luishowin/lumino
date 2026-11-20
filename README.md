@@ -4,7 +4,7 @@ Lumino is an early learning adventure where learners explore concepts and use th
 
 ## Run locally
 
-Run `npm run check`, then `npm start` and open `http://localhost:4173`. The app uses browser-local storage and can work offline after its first successful load. The project introduction is at `about.html`.
+Run `npm run check`, then `npm start` and open `http://localhost:4173`. The GitHub Pages entry point is a public introduction, and the interactive learning prototype is available at `learn.html`. The app uses browser-local storage and can work offline after its first successful load.
 
 The five activities are early prototypes and need educational review. The previous platforming prototype is available in the Git history; integrating subject-specific platform challenges remains future work. Accounts, payments, live AI, and full curricula are not implemented.
 

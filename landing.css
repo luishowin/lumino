@@ -1,0 +1,21 @@
+.landing-shell {
+  min-height: calc(100vh - 76px);
+  padding-top: clamp(4.5rem, 10vw, 9rem);
+  background: radial-gradient(circle at 92% 14%, rgba(101, 246, 193, .16), transparent 27rem);
+}
+
+.landing-shell > .primary-button {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.landing-grid {
+  margin-top: clamp(4rem, 8vw, 7rem);
+}
+
+.landing-grid section {
+  border-top: 1px solid var(--line);
+  padding: 1.5rem 1rem 1.5rem 0;
+}
+
+.landing-grid .eyebrow { margin-bottom: .6rem; }

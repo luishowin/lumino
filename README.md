@@ -20,6 +20,6 @@ The five activities are early prototypes and need educational review. The previo
 
 ## Assets and contributions
 
-The tutor sprites and homepage portrait use original artwork cleared for public distribution. Only add assets with verified rights for public distribution. Do not commit secrets, learner data, internal documents, or unlicensed artwork. Learning content should include an objective, an application challenge, and a retrieval check.
+The tutor sprites and homepage portraits use original artwork cleared for public distribution. Only add assets with verified rights for public distribution. Do not commit secrets, learner data, internal documents, or unlicensed artwork. Learning content should include an objective, an application challenge, and a retrieval check.
 
 Released under the [MIT License](LICENSE).

@@ -152,17 +152,23 @@
   .section-intro + .section-intro { margin-top: 1rem; }
   .section-intro + .accordion { margin-top: 2rem; }
 
-  .tutor-portrait {
-    display: block;
-    width: min(100%, 38rem);
-    height: auto;
-    justify-self: center;
-    align-self: center;
+  .tutor-profiles {
+    display: grid;
+    gap: 1.25rem;
+    list-style: none;
+    margin: 0 0 1.5rem;
+    padding: 0;
+    max-width: 34rem;
   }
-  .tutor-profiles { margin: 0 0 1.5rem; }
-  .tutor-profiles dt { font-weight: 600; }
-  .tutor-profiles dd { margin: .2rem 0 0; color: var(--charcoal-soft); }
-  .tutor-profiles dd + dt { margin-top: 1rem; }
+  .tutor-profile {
+    display: grid;
+    grid-template-columns: 100px minmax(0, 1fr);
+    gap: 1rem;
+    align-items: center;
+  }
+  .tutor-profile img { display: block; width: 100%; height: auto; }
+  .tutor-profile h3 { margin: 0; font-size: 1em; font-weight: 600; }
+  .tutor-profile p { margin: .2rem 0 0; color: var(--charcoal-soft); }
   .tutor-intro .text-link { margin-top: 1.25rem; }
 
   /* Accordion (native details/summary: keyboard and screen-reader support built in) */
@@ -219,12 +225,6 @@
 
   @media (min-width: 52rem) {
     .section { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; }
-    .tutor-section .tutor-portrait { grid-column: 2; grid-row: 1 / span 2; }
-  }
-
-  @media (width < 52rem) {
-    .tutor-section { row-gap: 2.5rem; }
-    .tutor-section .tutor-portrait { width: min(80%, 30.4rem); }
   }
 
   @media (max-width: 30rem) {
@@ -283,18 +283,25 @@
       </div>
     </section>
 
-    <section class="section tutor-section" aria-labelledby="meet-tutors">
+    <section class="section" aria-labelledby="meet-tutors">
       <h2 id="meet-tutors" class="reveal" style="--i:0">Meet your tutors</h2>
-      <img class="tutor-portrait reveal" style="--i:1" src="assets/lumino-tutors.webp?v=2"
-        width="1536" height="1024" alt="Pixel-art portrait of Charles on the left and Linda on the right, standing back to back"
-        loading="lazy" decoding="async">
-      <div class="tutor-intro reveal" style="--i:2">
-        <dl class="tutor-profiles">
-          <dt>Linda</dt>
-          <dd>Warm and methodical, Linda breaks ideas into clear steps and helps you reason through a challenge.</dd>
-          <dt>Charles</dt>
-          <dd>Relaxed and practical, Charles uses familiar examples to show how an idea works.</dd>
-        </dl>
+      <div class="tutor-intro reveal" style="--i:1">
+        <ul class="tutor-profiles" role="list">
+          <li class="tutor-profile">
+            <img src="assets/lumino-linda.webp" width="100" height="100" alt="" loading="lazy" decoding="async">
+            <div>
+              <h3>Linda</h3>
+              <p>Warm and methodical, Linda breaks ideas into clear steps and helps you reason through a challenge.</p>
+            </div>
+          </li>
+          <li class="tutor-profile">
+            <img src="assets/lumino-charles.webp" width="100" height="100" alt="" loading="lazy" decoding="async">
+            <div>
+              <h3>Charles</h3>
+              <p>Relaxed and practical, Charles uses familiar examples to show how an idea works.</p>
+            </div>
+          </li>
+        </ul>
         <p class="section-intro">Choose who guides you through explanations, hints and recaps. You can switch tutors at any point in a lesson.</p>
         <a class="text-link" href="lumino-app/">Try a lesson with Linda or Charles</a>
       </div>

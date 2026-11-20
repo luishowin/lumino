@@ -1,9 +1,9 @@
-const CACHE = "lumino-v14";
+const CACHE = "lumino-v15";
 const ASSETS = [
   "./", "./index.html", "./lumino-app/", "./lumino-app/index.html", "./learn.html", "./about.html",
   "./styles.css", "./landing.css", "./app.js?v=12", "./manifest.webmanifest",
   "./assets/lumino-preview.png", "./assets/lumino-favicon.png", "./assets/lumino-fire-hydrant.webp",
-  "./assets/lumino-tutors.webp?v=2",
+  "./assets/lumino-linda.webp", "./assets/lumino-charles.webp",
   "./tutor/tutor.css", "./tutor/components.mjs", "./tutor/dialogue.mjs",
   "./tutor/assets/linda.webp", "./tutor/assets/charles.webp",
 ];

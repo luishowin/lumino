@@ -1,4 +1,4 @@
-const CACHE = "lumino-v5";
+const CACHE = "lumino-v6";
 const ASSETS = ["./", "./index.html", "./lumino-app/", "./lumino-app/index.html", "./learn.html", "./about.html", "./styles.css", "./landing.css", "./app.js", "./manifest.webmanifest", "./icons/lumino-mark.svg"];
 
 self.addEventListener("install", (event) => {
@@ -13,5 +13,9 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  if (event.request.mode === "navigate") {
+    event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
+    return;
+  }
   event.respondWith(caches.match(event.request).then((cached) => cached || fetch(event.request)));
 });

@@ -10,7 +10,7 @@ Future STEAM challenges will ask learners to imagine multiple solutions, test a 
 
 That practice also builds judgment for working with AI. Learners should be able to question a suggestion, check its assumptions and evidence, and decide how to improve it.
 
-The current prototype lays the groundwork with five subject maps covering mathematics, physics, chemistry, biology, and English. Each has one short starter activity. Winston is a scripted guide who helps learners choose a starting point based on their confidence.
+The current prototype lays the groundwork with five subject maps covering mathematics, physics, chemistry, biology, and English. Each has one short starter activity. Linda and Charles help learners choose a starting point and offer scripted explanations, hints, and recaps. Learners can switch tutors on the map and during a lesson. Tutor components, scripts written for ages 14–17, and sprite assets live in `tutor/`.
 
 ## Run locally
 
@@ -20,6 +20,6 @@ The five activities are early prototypes and need educational review. The previo
 
 ## Assets and contributions
 
-The current visuals are temporary original placeholders. Only add assets with verified rights for public distribution. Do not commit secrets, learner data, internal documents, or unlicensed artwork. Learning content should include an objective, an application challenge, and a retrieval check.
+The tutor sprites and homepage portrait use original artwork cleared for public distribution. Only add assets with verified rights for public distribution. Do not commit secrets, learner data, internal documents, or unlicensed artwork. Learning content should include an objective, an application challenge, and a retrieval check.
 
 Released under the [MIT License](LICENSE).

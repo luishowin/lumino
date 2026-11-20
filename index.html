@@ -152,6 +152,19 @@
   .section-intro + .section-intro { margin-top: 1rem; }
   .section-intro + .accordion { margin-top: 2rem; }
 
+  .tutor-portrait {
+    display: block;
+    width: min(100%, 38rem);
+    height: auto;
+    justify-self: center;
+    align-self: center;
+  }
+  .tutor-profiles { margin: 0 0 1.5rem; }
+  .tutor-profiles dt { font-weight: 600; }
+  .tutor-profiles dd { margin: .2rem 0 0; color: var(--charcoal-soft); }
+  .tutor-profiles dd + dt { margin-top: 1rem; }
+  .tutor-intro .text-link { margin-top: 1.25rem; }
+
   /* Accordion (native details/summary: keyboard and screen-reader support built in) */
   .accordion { max-width: 36rem; border-top: 1px solid var(--line-soft); }
   .accordion details { border-bottom: 1px solid var(--line-soft); }
@@ -206,6 +219,12 @@
 
   @media (min-width: 52rem) {
     .section { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; }
+    .tutor-section .tutor-portrait { grid-column: 2; grid-row: 1 / span 2; }
+  }
+
+  @media (width < 52rem) {
+    .tutor-section { row-gap: 2.5rem; }
+    .tutor-section .tutor-portrait { width: min(80%, 30.4rem); }
   }
 
   @media (max-width: 30rem) {
@@ -264,6 +283,23 @@
       </div>
     </section>
 
+    <section class="section tutor-section" aria-labelledby="meet-tutors">
+      <h2 id="meet-tutors" class="reveal" style="--i:0">Meet your tutors</h2>
+      <img class="tutor-portrait reveal" style="--i:1" src="assets/lumino-tutors.webp?v=2"
+        width="1536" height="1024" alt="Pixel-art portrait of Charles on the left and Linda on the right, standing back to back"
+        loading="lazy" decoding="async">
+      <div class="tutor-intro reveal" style="--i:2">
+        <dl class="tutor-profiles">
+          <dt>Linda</dt>
+          <dd>Warm and methodical, Linda breaks ideas into clear steps and helps you reason through a challenge.</dd>
+          <dt>Charles</dt>
+          <dd>Relaxed and practical, Charles uses familiar examples to show how an idea works.</dd>
+        </dl>
+        <p class="section-intro">Choose who guides you through explanations, hints and recaps. You can switch tutors at any point in a lesson.</p>
+        <a class="text-link" href="lumino-app/">Try a lesson with Linda or Charles</a>
+      </div>
+    </section>
+
     <section class="section" aria-labelledby="design-test">
       <h2 id="design-test" class="reveal" style="--i:0">Design, test and revise</h2>
       <div>
@@ -280,7 +316,7 @@
       <h2 id="find-path" class="reveal" style="--i:0">Find your path</h2>
       <div>
         <p class="section-intro reveal" style="--i:1">
-          The prototype starts with five subject maps that build skills for future STEAM challenges. Choose a subject and tell Winston which ideas already feel familiar.
+          The prototype starts with five subject maps that build skills for future STEAM challenges. Choose a subject and tell your tutor which ideas already feel familiar.
           Lumino uses your answers to suggest a starting point, which you are free to adjust.
           Open a subject to see the level to expect and some of the topics it covers.
         </p>
@@ -335,9 +371,9 @@
             </div>
           </details>
           <details class="reveal" style="--i:2">
-            <summary>Who is Winston?</summary>
+            <summary>Who are Linda and Charles?</summary>
             <div class="panel">
-              <p>Winston is your guide in Lumino. He introduces each subject, asks what already feels familiar, and helps you choose a sensible place to begin.</p>
+              <p>Linda and Charles are Lumino’s scripted tutors. Linda gives structured explanations and Charles uses practical examples. You can switch tutors during a lesson.</p>
             </div>
           </details>
           <details class="reveal" style="--i:3">
@@ -349,7 +385,7 @@
           <details class="reveal" style="--i:4">
             <summary>How is my starting point chosen?</summary>
             <div class="panel">
-              <p>You pick a subject and tell Winston which ideas feel familiar. Lumino suggests a starting point from your answers, and you can change it at any time.</p>
+              <p>You pick a subject and tell your tutor which ideas feel familiar. Lumino suggests a starting point from your answers, and you can change it at any time.</p>
             </div>
           </details>
           <details class="reveal" style="--i:5">

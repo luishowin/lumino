@@ -2,6 +2,8 @@
 
 Lumino is a STEAM learning adventure for learners, parents and guardians. Build your way through this. Learn an idea, apply it to a problem and see what you can recall.
 
+See the [project state](PROJECT_STATE.md) for what’s live, curriculum progress and the proposed next milestone.
+
 The planned learning resource center will help learners revisit concepts and find ways to practise, and give parents and guardians guidance for supporting learning at home.
 
 ## Learning direction

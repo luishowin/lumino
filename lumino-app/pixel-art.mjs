@@ -54,11 +54,3 @@ export function drawSky(){
   x.fillStyle='#B9CFC9';x.fillRect(265,25,2,2);x.fillRect(263,28,1,1);
   [['#0E2430',122,.03,12],['#0B1B26',144,.045,9]].forEach(function(l,li){x.fillStyle=l[0];for(var i=0;i<W;i++){var y=Math.floor(l[1]+Math.sin(i*l[2]+li*2)*l[3]+Math.sin(i*l[2]*2.3)*l[3]*.4);x.fillRect(i,y,1,H-y)}});
 }
-export function drawGround(){
-  var c=document.createElement('canvas');c.width=16;c.height=32;var x=c.getContext('2d');
-  x.fillStyle='#1C3442';x.fillRect(0,0,16,32);
-  x.fillStyle='#6AF4BF';x.fillRect(0,0,16,2);x.fillStyle='#2FB88A';x.fillRect(0,2,16,2);
-  x.fillStyle='#27465A';[[2,8],[9,6],[13,12],[5,16],[11,20],[3,25],[8,28]].forEach(function(p){x.fillRect(p[0],p[1],2,2)});
-  x.fillStyle='#142836';x.fillRect(0,30,16,2);
-  document.documentElement.style.setProperty('--ground','url('+c.toDataURL()+')');
-}

@@ -6,8 +6,8 @@
   isolation: isolate;
   overflow: hidden;
   margin: 0 0 2rem;
-  padding: clamp(1rem, 4vw, 2rem);
-  border: 1px solid var(--line);
+  padding: clamp(.85rem, 3.4vw, 1.7rem);
+  border: var(--stroke) solid var(--line);
   background: #203a39 url("../assets/landscapes/wheat.webp") center 44% / cover;
 }
 
@@ -28,37 +28,37 @@
   width: min(100%, 230px);
   height: 92px;
   object-fit: cover;
-  border: 1px solid var(--line);
+  border: var(--stroke) solid var(--line);
 }
 
 .adventure {
   max-width: 1180px;
   margin: auto;
-  padding: clamp(1rem, 3vw, 2rem) clamp(.9rem, 4vw, 3rem) 2rem;
+  padding: clamp(.85rem, 2.55vw, 1.7rem) clamp(.85rem, 3.4vw, 2.55rem) 1.7rem;
 }
 
 .adventure-top, .adventure-heading, .adventure-controls, .adventure-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: .85rem;
 }
 
-.adventure-top { min-height: 48px; }
+.adventure-top { min-height: 44px; flex-wrap: wrap; }
 .adventure-top label { margin-right: .65rem; color: var(--muted); font-size: .85rem; }
 .adventure-top select { width: auto; padding: .55rem; }
-.adventure-heading { align-items: end; margin: 1.15rem 0 1rem; }
-.adventure-heading h1 { margin: 0; font-size: clamp(2rem, 5vw, 3.85rem); }
+.adventure-heading { align-items: end; margin: 1rem 0 .85rem; }
+.adventure-heading h1 { margin: 0; font-size: clamp(1.7rem, 4.25vw, 3.25rem); }
 .adventure-heading .eyebrow { margin-bottom: .45rem; text-transform: uppercase; }
 .adventure-heading > p { max-width: 23rem; margin: 0; color: #cbdbd8; line-height: 1.45; }
 .adventure-stage {
   position: relative;
-  border: 1px solid #55746e;
+  border: var(--stroke) solid #55746e;
   background: #112630;
   outline-offset: 3px;
   box-shadow: 0 12px 35px #06101975;
 }
-.adventure-stage:focus-visible { outline: 2px solid var(--lime); }
+.adventure-stage:focus-visible { outline: var(--stroke) solid var(--lime); }
 .adventure-stage canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; }
 .adventure-progress { position: absolute; inset: auto 0 0; height: 4px; background: #203c46; }
 .adventure-progress span { display: block; height: 100%; background: var(--lime); }
@@ -73,14 +73,14 @@
   background: #06151ddd;
   text-align: center;
 }
-.adventure-overlay p { margin: 0; font-size: clamp(1.9rem, 6vw, 4rem); font-weight: 850; letter-spacing: -.05em; }
-.adventure-controls { margin-top: 1.1rem; }
+.adventure-overlay p { margin: 0; font-size: clamp(1.6rem, 5.1vw, 3.4rem); font-weight: 850; letter-spacing: -.05em; }
+.adventure-controls { margin-top: .95rem; }
 .adventure-move, .adventure-actions { display: flex; gap: .4rem; }
 .adventure-controls button {
   min-width: 44px;
   min-height: 44px;
   padding: .3rem .65rem;
-  border: 1px solid var(--line);
+  border: var(--stroke) solid var(--line);
   color: var(--paper);
   background: #173641;
   touch-action: none;
@@ -89,7 +89,7 @@
 .adventure-controls button:active { color: var(--ink); background: var(--lime); }
 .adventure-move button { font-size: 1.2rem; }
 #trail-help { margin: 0; color: var(--muted); font-size: .8rem; text-align: center; }
-.adventure-footer { min-height: 48px; margin-top: .55rem; }
+.adventure-footer { min-height: 44px; margin-top: .5rem; }
 .adventure-footer p { margin: 0; color: var(--sun); line-height: 1.4; font-size: .9rem; }
 .adventure-footer button { margin-left: auto; text-align: right; }
 .adventure [hidden] { display: none; }

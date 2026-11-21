@@ -10,22 +10,70 @@
   <link rel="apple-touch-icon" href="../assets/lumino-favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Hedvig+Letters+Serif&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../adventure/adventure.css">
-  <link rel="stylesheet" href="./app.css?v=19">
+  <link href="https://fonts.googleapis.com/css2?family=Hedvig+Letters+Serif&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="../adventure/adventure.css?v=21">
+  <link rel="stylesheet" href="./app.css?v=27">
 </head>
 <body>
   <canvas id="sky" aria-hidden="true"></canvas>
   <div class="frame" id="frame">
     <main id="stage">
-      <section class="splash" role="status">
+      <section class="splash" id="startup">
         <div class="mark xl" aria-hidden="true">L</div>
         <div class="wordmark">Lumino</div>
-        <p class="muted">Preparing your world…</p>
+        <p class="muted" id="startup-status" role="status" hidden>Preparing your world…</p>
+        <p id="startup-actions" hidden><a class="btn" href="./">Reload Lumino</a></p>
+        <noscript><p class="muted">Turn on JavaScript and reload to open Lumino.</p></noscript>
       </section>
-      <noscript><p style="padding:2rem">Lumino needs JavaScript to run.</p></noscript>
     </main>
   </div>
-  <script type="module" src="../app.js?v=16"></script>
+  <script>
+    (() => {
+      const splash = document.getElementById('startup');
+      const status = document.getElementById('startup-status');
+      const actions = document.getElementById('startup-actions');
+      status.hidden = false;
+
+      function showRecovery(message) {
+        if (!splash.isConnected) return;
+        status.textContent = message;
+        splash.classList.add('startup-failed');
+        actions.hidden = false;
+      }
+
+      if (location.protocol === 'file:') {
+        const link = actions.querySelector('a');
+        link.href = 'http://localhost:4173/lumino-app/';
+        link.textContent = 'Open local preview';
+        showRecovery('Open Lumino from its local preview. If the preview is closed, start it with npm start.');
+        return;
+      }
+
+      const entry = document.createElement('script');
+      if (!('noModule' in entry)) {
+        showRecovery('This browser cannot open Lumino. Update it or try a newer browser.');
+        return;
+      }
+
+      const timer = setTimeout(() => showRecovery('Lumino is taking longer than usual to open. You can try reloading.'), 8000);
+      function checkStartup() {
+        clearTimeout(timer);
+        showRecovery('Lumino couldn’t load. Check your connection and try again.');
+      }
+      entry.type = 'module';
+      entry.src = '../app.js?v=27';
+      entry.addEventListener('load', checkStartup);
+      entry.addEventListener('error', checkStartup);
+      document.body.append(entry);
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('../sw.js')
+          .then(registration => {
+            if (registration.active) return registration.update();
+          })
+          .catch(() => {});
+      }
+    })();
+  </script>
 </body>
 </html>

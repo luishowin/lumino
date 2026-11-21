@@ -2,11 +2,14 @@
   "name": "Lumino - STEAM Learning Adventure Platform",
   "short_name": "Lumino",
   "description": "Lumino is a STEAM learning adventure platform for learners, parents and guardians, with hands-on challenges and a planned learning resource center.",
-  "start_url": ".",
+  "id": "/lumino/",
+  "start_url": "./lumino-app/",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#07131d",
-  "theme_color": "#07131d",
+  "background_color": "#0A141C",
+  "theme_color": "#0A141C",
   "icons": [
+    { "src": "assets/lumino-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "assets/lumino-favicon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }

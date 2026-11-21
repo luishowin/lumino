@@ -12,7 +12,7 @@ In the planned exploration game, learners will apply physics and chemistry by bu
 
 That practice also builds judgment for working with AI. Learners should be able to question a suggestion, check its assumptions and evidence, and decide how to improve it.
 
-The prototype pairs learners with Linda or Charles, then uses a short confidence check to suggest a subject plan. Mathematics, physics, chemistry, biology, and English each offer one Learn, Apply, and Recall starter. The roadmap previews upcoming topics. XP and streaks are saved on this device, and Ranks compares local XP with sample scores.
+The prototype pairs learners with Linda or Charles and lets them choose a starting level for each topic. A short, optional confidence check can suggest a level. Mathematics, physics, chemistry, biology, and English each offer one Learn, Apply, and Recall starter. Topics preview learning goals for future lessons, with Senior (AS & A Level) planned. XP and streaks are saved on this device, and Ranks compares local XP with sample scores.
 
 ## Run locally
 
@@ -24,6 +24,6 @@ The activities are early prototypes and need educational review. Accounts, payme
 
 ## Assets and contributions
 
-The canonical Linda and Charles portraits are in `assets/`. The transparent expression sheets in `tutor/assets/` use four equal square cells. Read across each row, from thoughtful and speaking on the top row to encouraging and delighted on the bottom row. Use the canonical portraits for the neutral expression. Only add assets with verified rights for public distribution. Do not commit secrets, learner data, internal documents, or unlicensed artwork. Learning content should include an objective, an application challenge, and a retrieval check.
+The canonical Linda and Charles portraits are in `assets/`. The `*-poses.webp` dialogue sheets in `tutor/assets/` have four square cells. The top row is greeting and explaining. The bottom row is thinking and encouraging. Only add assets with verified rights for public distribution. Do not commit secrets, learner data, internal documents, or unlicensed artwork. Learning content should include an objective, an application challenge, and a retrieval check.
 
 Released under the [MIT License](LICENSE).

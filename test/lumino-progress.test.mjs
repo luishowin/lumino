@@ -14,7 +14,7 @@ function storageWith(seeds = {}) {
   };
 }
 
-test('legacy progress becomes prior achievements and keeps the selected learning level', () => {
+test('legacy progress becomes prior achievements and keeps the starting topic', () => {
   const storage = storageWith({
     'lumino-v2': { intro: true, subject: 'mathematics', level: 2, guide: 'male', complete: ['physics', 'mathematics'] },
   });
@@ -22,7 +22,7 @@ test('legacy progress becomes prior achievements and keeps the selected learning
   assert.equal(state.tutor, 'charles');
   assert.equal(state.subject, 'math');
   assert.equal(state.onboarded, true);
-  assert.deepEqual(state.plans, { math: { level: 2, start: 0 } });
+  assert.deepEqual(state.plans, { math: { topicId: 'linear-equations', levels: {} } });
   assert.deepEqual(state.previous, ['physics', 'math']);
   assert.deepEqual(state.completed, []);
   assert.deepEqual(loadProgress(storage), state);
@@ -41,9 +41,9 @@ test('demo progress preserves XP and distinguishes roadmap suggestions from play
   assert.deepEqual(state.completed, ['biology']);
   assert.deepEqual(state.previous, ['physics']);
   assert.deepEqual(state.plans, {
-    physics: { level: 1, start: 0 },
-    biology: { level: 1, start: 1 },
-    english: { level: 2, start: 2 },
+    physics: { topicId: 'speed-and-velocity', levels: {} },
+    biology: { topicId: 'photosynthesis', levels: {} },
+    english: { topicId: 'persuasive-writing', levels: {} },
   });
   assert.equal(state.tutor, 'linda');
   assert.equal(state.xp, 30);
@@ -81,11 +81,45 @@ test('practice can extend a streak across one missed day by using a recharge', (
   assert.equal(state.bestStreak, 2);
 });
 
-test('reset clears the replacement and both earlier save formats', () => {
-  const storage = storageWith({ 'lumino.app.v2': {}, 'lumino-v2': {} });
+test('v3 roadmap positions migrate to topic IDs without assigning a difficulty', () => {
+  const storage = storageWith({
+    'lumino.app.v3': {
+      tutor: 'charles', subject: 'physics', onboarded: true, xp: 60,
+      completed: ['physics', 'math'], streak: 3, bestStreak: 4, lastDay: 20100,
+      plans: { physics: { level: 0, start: 2 }, math: { level: 3, start: 3 } },
+    },
+  });
+  const state = loadProgress(storage);
+  assert.deepEqual(state.plans, {
+    physics: { topicId: 'friction', levels: {} },
+    math: { topicId: 'maxima-and-minima', levels: {} },
+  });
+  assert.equal(state.onboarded, true);
+  assert.equal(state.tutor, 'charles');
+  assert.equal(state.xp, 60);
+  assert.equal(state.bestStreak, 4);
+  assert.deepEqual(state.completed, ['physics', 'math']);
+  assert.deepEqual(JSON.parse(storage.getItem(PROGRESS_KEY)), state);
+});
+
+test('each topic keeps its own playable level choice', () => {
+  const state = freshProgress();
+  state.plans.physics = {
+    topicId: 'acceleration',
+    levels: { friction: 'beginner', acceleration: 'advanced', momentum: 'senior', atoms: 'intermediate' },
+  };
+  const storage = storageWith();
+  assert.equal(saveProgress(storage, state), true);
+  assert.deepEqual(loadProgress(storage).plans, {
+    physics: { topicId: 'acceleration', levels: { friction: 'beginner', acceleration: 'advanced' } },
+  });
+});
+
+test('reset clears the current and all earlier save formats', () => {
+  const storage = storageWith({ 'lumino.app.v3': {}, 'lumino.app.v2': {}, 'lumino-v2': {} });
   assert.equal(saveProgress(storage, freshProgress()), true);
   assert.equal(clearProgress(storage), true);
-  for (const key of [PROGRESS_KEY, 'lumino.app.v2', 'lumino-v2']) assert.equal(storage.getItem(key), null);
+  for (const key of [PROGRESS_KEY, 'lumino.app.v3', 'lumino.app.v2', 'lumino-v2']) assert.equal(storage.getItem(key), null);
 });
 
 test('unavailable or corrupted storage allows a fresh session', () => {

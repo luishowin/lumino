@@ -1,14 +1,50 @@
-import { SUBJECTS, TROPHIES } from './content.mjs';
+import { TROPHIES } from './content.mjs?v=24';
+import { LEVELS, SUBJECTS, subjectById, topicById } from './curriculum.mjs?v=24';
 
-export const PROGRESS_KEY = 'lumino.app.v3';
+export const PROGRESS_KEY = 'lumino.app.v4';
+const ROADMAP_KEY = 'lumino.app.v3';
 const DEMO_KEY = 'lumino.app.v2';
 const LEGACY_KEY = 'lumino-v2';
-const KEYS = [PROGRESS_KEY, DEMO_KEY, LEGACY_KEY];
+const KEYS = [PROGRESS_KEY, ROADMAP_KEY, DEMO_KEY, LEGACY_KEY];
+
+// The layout of the original numeric roadmaps, independent of the current picker order.
+const legacyTopics = {
+  math: [
+    ['number-sense', 'add-and-subtract', 'multiply-and-divide', 'fractions'],
+    ['letters-for-numbers', 'simple-equations', 'expressions', 'patterns-and-rules'],
+    ['linear-equations', 'brackets-and-factorising', 'simultaneous-equations', 'quadratics'],
+    ['gradients-from-tangents', 'derivatives', 'stationary-points', 'maxima-and-minima'],
+  ],
+  physics: [
+    ['pushes-and-pulls', 'gravity', 'friction', 'balanced-forces'],
+    ['speed-and-velocity', 'acceleration', 'kinetic-and-potential-energy', 'conservation-of-energy'],
+    ['simple-circuits', 'current-and-voltage', 'ohms-law', 'sound-and-light-waves'],
+    ['newtons-laws', 'momentum', 'work-and-power', 'circular-motion'],
+  ],
+  chemistry: [
+    ['solids-liquids-and-gases', 'changing-state', 'the-particle-model', 'mixtures-and-separation'],
+    ['atoms', 'the-periodic-table', 'elements-and-compounds', 'chemical-bonding'],
+    ['physical-and-chemical-change', 'acids-and-bases', 'balancing-equations', 'rates-of-reaction'],
+    ['moles', 'concentration', 'percentage-yield', 'gas-volumes'],
+  ],
+  biology: [
+    ['characteristics-of-life', 'classification', 'plants-and-animals', 'habitats'],
+    ['cell-structure', 'photosynthesis', 'transport-in-plants', 'plant-reproduction'],
+    ['digestion', 'circulation', 'breathing-and-respiration', 'the-nervous-system'],
+    ['food-webs', 'energy-flow', 'dna-and-inheritance', 'evolution'],
+  ],
+  english: [
+    ['finding-the-main-idea', 'making-inferences', 'vocabulary-in-context', 'fact-and-opinion'],
+    ['parts-of-speech', 'tenses', 'punctuation', 'sentence-structure'],
+    ['paragraph-structure', 'narrative-writing', 'persuasive-writing', 'editing-and-proofreading'],
+    ['figurative-language', 'tone-and-mood', 'analysing-an-authors-choices', 'comparing-texts'],
+  ],
+};
 
 const validTutor = value => ['linda', 'charles'].includes(value) ? value : null;
 const subjectId = value => {
   const id = value === 'mathematics' ? 'math' : value;
-  return SUBJECTS.some(subject => subject.id === id) ? id : null;
+  return subjectById(id) ? id : null;
 };
 const count = value => Number.isSafeInteger(value) && value >= 0 ? value : 0;
 const day = value => Number.isInteger(value) && value >= 0 ? value : null;
@@ -32,18 +68,26 @@ function read(storage, key) {
 }
 
 function validPlan(subject, value) {
-  if (!Number.isInteger(value?.level) || subject.levels[value.level] === undefined) return null;
-  const level = count(value.level);
-  const start = Math.min(count(value.start), subject.levels[level].t.length - 1);
-  return { level, start };
+  if (!topicById(subject, value?.topicId)) return null;
+  const levels = Object.fromEntries(Object.entries(value.levels || {}).filter(([id, level]) =>
+    topicById(subject, id) && LEVELS.some(item => item.id === level)));
+  return { topicId: value.topicId, levels };
 }
 
-function normalize(saved) {
+function migratePlan(subject, value) {
+  if (!Number.isInteger(value?.level)) return null;
+  const topics = legacyTopics[subject.id][value.level];
+  if (!topics) return null;
+  const topicId = topics[Math.min(count(value.start), topics.length - 1)];
+  return validPlan(subject, { topicId });
+}
+
+function normalize(saved, readPlan = validPlan) {
   const state = freshProgress();
   state.tutor = validTutor(saved.tutor);
   state.subject = subjectId(saved.subject);
   for (const subject of SUBJECTS) {
-    const plan = validPlan(subject, saved.plans?.[subject.id]);
+    const plan = readPlan(subject, saved.plans?.[subject.id]);
     if (plan) state.plans[subject.id] = plan;
   }
   state.completed = subjectList(saved.completed);
@@ -65,9 +109,16 @@ export function loadProgress(storage) {
   const saved = read(storage, PROGRESS_KEY);
   if (saved) return normalize(saved);
 
+  const roadmap = read(storage, ROADMAP_KEY);
+  if (roadmap) {
+    const state = normalize(roadmap, migratePlan);
+    saveProgress(storage, state);
+    return state;
+  }
+
   const demo = read(storage, DEMO_KEY);
   const legacy = read(storage, LEGACY_KEY);
-  const state = demo ? normalize(demo) : freshProgress();
+  const state = demo ? normalize(demo, migratePlan) : freshProgress();
 
   if (demo) {
     state.completed = SUBJECTS.filter(({ id }) => {
@@ -79,9 +130,9 @@ export function loadProgress(storage) {
     state.tutor ||= validTutor(legacy.tutor) || (legacy.guide === 'male' ? 'charles' : 'linda');
     const id = subjectId(legacy.subject);
     state.subject ||= id;
-    const subject = SUBJECTS.find(item => item.id === id);
+    const subject = subjectById(id);
     if (subject && legacy.intro === true) {
-      state.plans[id] ||= validPlan(subject, { level: legacy.level, start: 0 }) || { level: 0, start: 0 };
+      state.plans[id] ||= migratePlan(subject, { level: legacy.level }) || migratePlan(subject, { level: 0 });
     }
     state.onboarded ||= legacy.intro === true;
     state.previous = subjectList(legacy.complete);

@@ -1,30 +1,3 @@
-export const SUBJECTS = [
- {id:'math',name:'Mathematics',icon:'ic-math',levels:[
-  {n:'Basic arithmetic',d:'Number facts, fractions and percentages',t:['Number sense','Add and subtract','Multiply and divide','Fractions'],q:['What is 48 ÷ 6?','Add 3/4 and 1/8.','Round 4,687 to the nearest hundred.']},
-  {n:'Basic algebra',d:'Letters for numbers and simple equations',t:['Letters for numbers','Simple equations','Expressions','Patterns and rules'],q:['Solve x + 7 = 15.','Simplify 3a + 2a.','If n = 4, what is 2n + 3?']},
-  {n:'Algebra',d:'Equations, brackets and quadratics',t:['Linear equations','Brackets and factorising','Simultaneous equations','Quadratics'],q:['Solve 3x + 5 = 20.','Expand (x + 2)(x + 5).','Solve x² − 5x + 6 = 0.']},
-  {n:'Differentiation',d:'Gradients and turning points (Extended)',t:['Gradients from tangents','Derivatives','Stationary points','Maxima and minima'],q:['Find the derivative of x³.','Find the gradient of y = x² at x = 3.','At what value of x does y = x² − 4x have a stationary point?']}]},
- {id:'physics',name:'Physics',icon:'bolt',levels:[
-  {n:'Everyday forces',d:'Pushes, pulls, gravity and friction',t:['Pushes and pulls','Gravity','Friction','Balanced forces'],q:['Why does a rolling ball slow down on grass?','What unit do we use to measure force?','What does it mean when forces are balanced?']},
-  {n:'Motion and energy',d:'Speed, acceleration and energy stores',t:['Speed and velocity','Acceleration','Kinetic and potential energy','Conservation of energy'],q:['A car travels 120 km in 2 hours. What is its average speed?','What is the difference between speed and velocity?','What is kinetic energy?']},
-  {n:'Electricity and waves',d:'Circuits, Ohm’s law, sound and light',t:['Simple circuits','Current and voltage','Ohm’s law','Sound and light waves'],q:['What does Ohm’s law say?','What do current and voltage each measure?','How is a sound wave different from a light wave?']},
-  {n:'Mechanics',d:'Newton’s laws, momentum, work and power',t:['Newton’s laws','Momentum','Work and power','Circular motion'],q:['State Newton’s second law.','What is the momentum of a 2 kg mass moving at 3 m/s?','How do you calculate the work done by a force?']}]},
- {id:'chemistry',name:'Chemistry',icon:'ic-chem',levels:[
-  {n:'States of matter',d:'Solids, liquids, gases and mixtures',t:['Solids, liquids and gases','Changing state','The particle model','Mixtures and separation'],q:['What happens to the particles when a solid melts?','How would you separate sand from water?','What is a mixture?']},
-  {n:'Atoms and elements',d:'The periodic table and bonding',t:['Atoms','The periodic table','Elements and compounds','Chemical bonding'],q:['Which three particles are inside an atom?','What does an element’s group number tell you?','What is the difference between ionic and covalent bonding?']},
-  {n:'Reactions',d:'Acids, bases and balancing equations',t:['Physical and chemical change','Acids and bases','Balancing equations','Rates of reaction'],q:['How can you tell a chemical change has happened?','What colour does litmus paper turn in an acid?','Balance this: H₂ + O₂ → H₂O.']},
-  {n:'Quantitative chemistry',d:'Moles, concentration and yield',t:['Moles','Concentration','Percentage yield','Gas volumes'],q:['What is a mole?','How do you calculate concentration in mol/dm³?','What is percentage yield?']}]},
- {id:'biology',name:'Biology',icon:'ic-bio',levels:[
-  {n:'Living things',d:'Life processes, classification and habitats',t:['Characteristics of life','Classification','Plants and animals','Habitats'],q:['Name three things all living things do.','What is a vertebrate?','What is a habitat?']},
-  {n:'Cells and plants',d:'Cell structure and photosynthesis',t:['Cell structure','Photosynthesis','Transport in plants','Plant reproduction'],q:['What does the nucleus of a cell do?','Write the word equation for photosynthesis.','How does water travel up a plant?']},
-  {n:'The human body',d:'Digestion, circulation and breathing',t:['Digestion','Circulation','Breathing and respiration','The nervous system'],q:['Where does most digestion take place?','What does the heart do?','What is the difference between breathing and respiration?']},
-  {n:'Ecosystems and genetics',d:'Food webs, DNA and evolution',t:['Food webs','Energy flow','DNA and inheritance','Evolution'],q:['What is a producer in a food web?','What is a gene?','What does natural selection mean?']}]},
- {id:'english',name:'English',icon:'ic-eng',levels:[
-  {n:'Reading',d:'Main ideas, inference and vocabulary',t:['Finding the main idea','Making inferences','Vocabulary in context','Fact and opinion'],q:['How do you find the main idea of a paragraph?','What does it mean to infer something?','How can context help you work out a new word?']},
-  {n:'Grammar',d:'Parts of speech, tenses and punctuation',t:['Parts of speech','Tenses','Punctuation','Sentence structure'],q:['What is the difference between a noun and a verb?','Which tense is “she had finished”?','When do you use a semicolon?']},
-  {n:'Writing',d:'Paragraphs, stories and persuasion',t:['Paragraph structure','Narrative writing','Persuasive writing','Editing and proofreading'],q:['What does a topic sentence do?','What makes the opening of a story engaging?','What is a persuasive technique?']},
-  {n:'Language and analysis',d:'Figurative language, tone and comparison',t:['Figurative language','Tone and mood','Analysing an author’s choices','Comparing texts'],q:['What is the difference between a simile and a metaphor?','How does an author create a tense mood?','How do you compare two texts?']}]}
-];
 export const TUTORS = [
  {id:'linda',name:'Linda',tag:'Clear and structured',hi:'I like things clear and in order.'},
  {id:'charles',name:'Charles',tag:'Relaxed and practical',hi:'I like to keep things relaxed and practical.'}

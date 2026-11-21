@@ -1,7 +1,7 @@
 export const trails = [
   {
     id: 'wheat', name: 'Wheat Fields', title: 'The signal trail', highlight: '#ecc56e', sky: '#487aa3',
-    goal: 'Run and jump across the broken causeway to reach the signal post.',
+    goal: 'Run and jump from ledge to ledge to reach the signal post.',
     platforms: [[0, 308, 320], [410, 274, 165], [645, 312, 235], [980, 272, 215], [1276, 304, 500]],
     exit: 1605,
   },
@@ -31,7 +31,7 @@ export const trails = [
   },
   {
     id: 'desert', name: 'Desert', title: 'The canyon relay', highlight: '#ffd196', sky: '#557db2',
-    goal: 'Cross the canyon ruins to reach the relay, then restore its power.',
+    goal: 'Cross the canyon, collect power cells and use them to power the relay.',
     platforms: [[0, 307, 345], [444, 272, 184], [700, 306, 225], [1015, 263, 253], [1344, 308, 456]],
     exit: 1630,
   },

@@ -2,7 +2,7 @@ export const tutors = {
   linda: {
     name: 'Linda',
     style: 'Clear and structured',
-    welcome: 'We’ll examine each idea, apply it to a workshop problem, and check what you remember.',
+    welcome: 'We’ll examine each idea, put it to work in a challenge, and check what you remember.',
     lessons: {
       mathematics: {
         concept: 'Suppose a tray has two screws and another has five. Addition tells you how many screws you have when you put the trays together.',
@@ -39,7 +39,7 @@ export const tutors = {
   charles: {
     name: 'Charles',
     style: 'Relaxed and practical',
-    welcome: 'Let’s see how things work, try a repair, and make sure the idea sticks.',
+    welcome: 'Let’s see how things work, try an idea out, and make sure it sticks.',
     lessons: {
       mathematics: {
         concept: 'Say you have two bolts in one pocket and five in the other. Empty both pockets onto the bench and count what’s there. That’s addition.',

@@ -6,4 +6,5 @@ dist/
 !.env.example
 *.log
 education_platform_*.pdf
+/igcse curriculums lumino ref/
 

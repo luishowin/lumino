@@ -183,12 +183,12 @@ const cast = (...sprites) => `<div class="story-cast">${sprites.join('')}</div>`
 
 function welcome(start = 0) {
   story([
-    scene(6500, copy('Learn something. Make something.', 'Lumino is a learning adventure. Every idea you learn becomes a tool for repairing a hopeful world.')
+    scene(6500, copy('Build your way through this.', 'Learn an idea with your tutor, then put it to work. Try a lesson or explore a trail and build a way across.')
       + cast(spr('hero', 8, '', 'bob'), spr('lantern', 8, '', 'lit'))),
     scene(7500, copy('How you learn here')
       + `<ol class="steps">
         <li><span class="num" aria-hidden="true">1</span><div><h3>Learn the idea</h3><p>A short, clear explanation from your tutor.</p></div></li>
-        <li><span class="num" aria-hidden="true">2</span><div><h3>Fix something</h3><p>Use it in a workshop challenge to repair part of the world.</p></div></li>
+        <li><span class="num" aria-hidden="true">2</span><div><h3>Put it to work</h3><p>Apply what you learned to a challenge in your subject.</p></div></li>
         <li><span class="num" aria-hidden="true">3</span><div><h3>Lock it in</h3><p>A quick recall check so it sticks.</p></div></li>
       </ol>` + cast(spr('hero', 6, '', 'bob'))),
     scene(6000, copy('A little every day', 'Build a streak, earn trophies and see how your XP compares in the sample league.')
@@ -243,7 +243,7 @@ function meetTutor() {
     scene(6500, copy(`Meet ${person.name}`) + tutorRow(`Hi, I’m ${person.name}. I’ll be right next to you while you learn. ${person.hi}`, 8)),
     scene(5000, copy('I explain ideas step by step.')
       + '<div class="story-example">3x + 5 = 20<br>3x = 15<br>x = 5</div>' + cast(spr(person.id, 6, '', 'bob'), spr('hero', 6))),
-    scene(5200, copy('We fix things together.')
+    scene(5200, copy('We try ideas together.')
       + '<div class="story-blocks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>'
       + cast(spr(person.id, 6, '', 'bob'))),
     scene(5000, copy('I check what stuck, then take you further.')
@@ -357,7 +357,7 @@ function welcomeOffer() {
   const available = !state.rechargeGiven;
   const node = screen(available ? 'Start now and get a free streak recharge.' : 'Ready for your first lesson?',
     `<div class="offer-icon">${spr('bolt', 12, '', 'bob')}</div>
-    <p class="muted">${available ? 'A recharge protects your streak if you miss a day. Finish a short lesson with ' + tutor().name + ' to claim it.' : 'Try a workshop challenge with ' + tutor().name + '.'}</p>
+    <p class="muted">${available ? 'A recharge protects your streak if you miss a day. Finish a short lesson with ' + tutor().name + ' to claim it.' : 'Try a lesson with ' + tutor().name + ' and put an idea to work.'}</p>
     <div class="footer-cta">
       <button type="button" class="btn banana block" data-start>Start now</button>
       <button type="button" class="textbtn" data-skip>Not now</button>
@@ -447,7 +447,7 @@ function lesson(sid, options = {}, initialStep = 0) {
       ? `<article class="lesson-card"><span class="tag-label">New idea</span><h2>${content.title}</h2><p>${content.learn}</p><div class="ex">${content.ex}</div></article>
         ${lessonTutor()}${trailLink}
         <div class="footer-cta"><button class="btn block" type="button" data-next>Continue to Apply</button></div>`
-      : `<div class="lesson-card"><span class="tag-label">${step === 1 ? 'Workshop challenge' : 'Quick recall'}</span><h2>${question.q}</h2></div>
+      : `<div class="lesson-card"><span class="tag-label">${step === 1 ? content.applyLabel : 'Quick recall'}</span><h2>${question.q}</h2></div>
         <div class="choices lesson-answers" role="group" aria-label="Answers">
           ${question.o.map((answer, index) => `<button class="choice" type="button" data-answer="${index}"><b>${answer}</b></button>`).join('')}
         </div>${lessonTutor()}<div data-feedback role="status"></div>`;
@@ -591,7 +591,7 @@ function learnTab(body) {
       : `<div class="empty">${tutorRow(`You haven’t set up your ${subject.name} path yet. A quick check will help us find your level.`)}
         <button type="button" class="btn" data-edit>Take the quick check</button></div>`}
     <section class="adventure-card" aria-labelledby="trail-card-title">
-      <div><h3 id="trail-card-title">Landscape trails</h3><p>Cross six landscapes and restore the canyon relay.</p>
+      <div><h3 id="trail-card-title">Landscape trails</h3><p>Explore six landscapes, build a crossing and power the canyon relay.</p>
         <button class="btn" type="button" data-explore>Explore the trails</button></div>
     </section>
     ${level ? `<h3 class="section-title">Your roadmap</h3>${roadmap(level, plan.start)}` : ''}`;

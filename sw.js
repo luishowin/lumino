@@ -1,7 +1,7 @@
-const CACHE = "lumino-v19";
+const CACHE = "lumino-v20";
 const ASSETS = [
   "./", "./index.html", "./lumino-app/", "./lumino-app/index.html", "./learn.html", "./about.html",
-  "./styles.css", "./landing.css", "./app.js?v=15", "./manifest.webmanifest",
+  "./styles.css", "./landing.css", "./app.js?v=16", "./manifest.webmanifest",
   "./assets/lumino-preview.png", "./assets/lumino-favicon.png", "./assets/lumino-fire-hydrant.webp",
   "./assets/lumino-linda.webp?v=19", "./assets/lumino-charles.webp?v=19",
   "./adventure/adventure.css", "./adventure/game.mjs", "./adventure/levels.mjs", "./adventure/art.mjs",

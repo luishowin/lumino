@@ -1,3 +1,4 @@
+import { mountOnboarding } from './lumino-app/onboarding.mjs?v=44';
 import { adventureMarkup, mountAdventure } from './adventure/game.mjs?v=30';
 import { landscape, trails } from './adventure/levels.mjs';
 import { LESSONS, RIVALS, TRAIL_LESSONS, TROPHIES, TUTORS, TUTOR_HELP } from './lumino-app/content.mjs?v=24';
@@ -251,21 +252,36 @@ function story(slides, { label, onDone, start = 0, skipLabel = 'Skip story', dia
 
 const scene = (duration, html) => ({ duration, html });
 const copy = (title, text = '') => `<div class="story-copy"><h2>${title}</h2>${text ? `<p class="muted">${text}</p>` : ''}</div>`;
-const cast = (...sprites) => `<div class="story-cast">${sprites.join('')}</div>`;
-
-function welcome(start = 0) {
-  story([
-    scene(6500, copy('Build your way through this.', 'Learn an idea with your tutor, then put it to work. Try a lesson or explore a trail and build a way across.')
-      + cast(spr('hero', 7, '', 'bob'), spr('lantern', 7, '', 'lit'))),
-    scene(7500, copy('How you learn here')
-      + `<ol class="steps">
-        <li><span class="num" aria-hidden="true">1</span><div><h3>Learn the idea</h3><p>A short, clear explanation from your tutor.</p></div></li>
-        <li><span class="num" aria-hidden="true">2</span><div><h3>Put it to work</h3><p>Apply what you learned to a challenge in your subject.</p></div></li>
-        <li><span class="num" aria-hidden="true">3</span><div><h3>Lock it in</h3><p>A quick recall check so it sticks.</p></div></li>
-      </ol>` + cast(spr('hero', 5, '', 'bob'))),
-    scene(6000, copy('A little every day', 'Build a streak, earn trophies and see how your XP compares in the sample league.')
-      + cast(spr('flame', 10, '', 'pop'))),
-  ], { label: 'Welcome to Lumino', start, onDone: chooseTutor });
+function welcome() {
+  const host = mount('<section aria-label="Welcome to Lumino"></section>');
+  host.classList.remove('enter');
+  const plan = state.plans[state.subject];
+  dispose = mountOnboarding(host, {
+    tutor: state.tutor,
+    subject: state.subject,
+    level: plan?.levels[plan.topicId],
+    reduceMotion: state.profile.reduceMotion,
+  }, {
+    onTutor(id) { state.tutor = id; persist(); },
+    onSubject(id) { state.subject = id; persist(); },
+    onLevel(level) {
+      const topicId = subjectById(state.subject).starterTopic;
+      state.plans[state.subject] = {
+        topicId, levels: { ...state.plans[state.subject]?.levels, [topicId]: level },
+      };
+      persist();
+    },
+    onFinish(action) {
+      if (action === 'start') {
+        lesson(state.subject, { fromOffer: true, welcomeReward: !state.rechargeGiven });
+      } else {
+        state.profile.since ??= localDay();
+        state.onboarded = true;
+        persist();
+        home('learn');
+      }
+    },
+  });
 }
 
 function tutorChoices(selected, style = 'pick') {
@@ -281,59 +297,6 @@ function bindTutorChoices(node, onChoose) {
     choice.addEventListener('click', () => {
       for (const item of choices) item.setAttribute('aria-pressed', String(item === choice));
       onChoose(choice.dataset.tutor);
-    });
-  }
-}
-
-function chooseTutor() {
-  let selected = tutor().id;
-  const node = screen('Pick your tutor', `<p class="muted">You can switch whenever you like during a lesson.</p>
-    ${tutorChoices(selected)}
-    <div class="onboarding-cast" data-preview></div>
-    <div class="footer-cta"><button type="button" class="btn block" data-continue></button></div>`,
-  { back: () => welcome(2) });
-  const preview = node.querySelector('[data-preview]');
-  const next = node.querySelector('[data-continue]');
-  function renderChoice() {
-    const person = TUTORS.find(item => item.id === selected);
-    preview.innerHTML = spr(person.id, 6, '', 'bob');
-    hydrate(preview);
-    next.textContent = `Continue with ${person.name}`;
-  }
-  bindTutorChoices(node, id => { selected = id; renderChoice(); });
-  renderChoice();
-  next.addEventListener('click', () => {
-    state.tutor = selected;
-    persist();
-    meetTutor();
-  });
-}
-
-function meetTutor() {
-  const person = tutor();
-  story([
-    scene(6500, tutorDialogue(person, 'greeting', `Meet ${person.name}`,
-      `<p>Hi, I’m ${person.name}. I’ll be right next to you while you learn. ${person.hi}</p>`, 'h2')),
-    scene(5000, tutorDialogue(person, 'explaining', 'I explain ideas step by step.',
-      '<div class="story-example">3x + 5 = 20<br>3x = 15<br>x = 5</div>', 'h2')),
-    scene(5200, tutorDialogue(person, 'thinking', 'We try ideas together.',
-      '<div class="story-blocks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>', 'h2')),
-    scene(5000, tutorDialogue(person, 'encouraging', 'I check what stuck, then take you further.',
-      `<div class="stars">${spr('star', 6)}${spr('star', 6)}${spr('star', 6)}</div>`, 'h2')),
-  ], { label: 'Meet your tutor', onDone: chooseSubject, dialogue: true });
-}
-
-function chooseSubject() {
-  const node = screen('What would you like to learn first?',
-    `<div class="choices" role="group" aria-label="Subject">${SUBJECTS.map(subject =>
-      `<button type="button" class="pick" data-subject="${subject.id}">${uiIcon(subject.id)}<b>${subject.name}</b></button>`).join('')}</div>
-    <div class="onboarding-cast">${spr(tutor().id, 5, '', 'bob')}</div>`,
-    { back: chooseTutor, backLabel: 'Change tutor' });
-  for (const button of node.querySelectorAll('[data-subject]')) {
-    button.addEventListener('click', () => {
-      state.subject = button.dataset.subject;
-      persist();
-      chooseTopic(subjectById(state.subject));
     });
   }
 }
@@ -354,7 +317,7 @@ function chooseTopic(subject, returnTab, focusedTopic) {
         }).join('')}</div>
       </details>`;
     }).join('')}</div>`,
-  { back: returnTab ? () => home(returnTab) : chooseSubject,
+  { back: () => home(returnTab),
     backLabel: returnTab === 'you' ? 'Back to You' : returnTab ? 'Back to Learn' : 'Change subject' });
   for (const button of node.querySelectorAll('[data-topic]')) {
     button.addEventListener('click', () => chooseLevel(subject, topicById(subject, button.dataset.topic), returnTab));
@@ -453,29 +416,7 @@ function reviewPlan(subject, topic, level, returnTab, recommendation) {
     state.plans[subject.id] = { topicId: topic.id, levels };
     state.subject = subject.id;
     persist();
-    if (returnTab) home(returnTab);
-    else welcomeOffer();
-  });
-}
-
-function welcomeOffer() {
-  const subject = subjectById(state.subject);
-  const topic = topicById(subject, state.plans[subject.id].topicId);
-  const available = !state.rechargeGiven;
-  const node = screen(available ? 'Start now and get a free streak recharge.' : 'Ready for your first lesson?',
-    `<div class="offer-icon">${spr('bolt', 10, '', 'bob')}</div>
-    <p class="muted">Try your ${subject.name} starter, <strong>${LESSONS[subject.id].title}</strong>, with ${tutor().name}.${available ? ' Finish it to earn a recharge that protects your streak if you miss a day.' : ''}</p>
-    <div class="footer-cta">
-      <button type="button" class="btn banana block" data-start>Start starter lesson</button>
-      <button type="button" class="textbtn" data-skip>Not now</button>
-    </div>`, { back: () => chooseLevel(subject, topic), backLabel: 'Change level' });
-  node.classList.add('offer');
-  click(node, '[data-start]', () => lesson(subject.id, { fromOffer: true, welcomeReward: available }));
-  click(node, '[data-skip]', () => {
-    if (!state.onboarded) state.profile.since ??= localDay();
-    state.onboarded = true;
-    persist();
-    home('learn');
+    home(returnTab);
   });
 }
 
@@ -518,7 +459,7 @@ function lesson(sid, options = {}, initialStep = 0) {
   </section>`);
   if (speech) dispose = () => speech.cancel();
   const lessonBody = node.querySelector('[data-lesson]');
-  click(node, '[data-exit]', fromOffer ? welcomeOffer : () => home(returnTab));
+  click(node, '[data-exit]', fromOffer ? welcome : () => home(returnTab));
 
   function lessonTutor() {
     const person = tutor();
@@ -1095,15 +1036,7 @@ function youTab(body) {
 applyPreferences();
 drawSky();
 if (state.onboarded) home('learn');
-else if (!state.tutor) welcome();
-else if (!state.subject) chooseSubject();
-else {
-  const subject = subjectById(state.subject);
-  const plan = state.plans[subject.id];
-  if (!plan) chooseTopic(subject);
-  else if (plan.levels[plan.topicId]) welcomeOffer();
-  else chooseLevel(subject, topicById(subject, plan.topicId));
-}
+else welcome();
 
 import('./lumino-app/shortcut.mjs?v=22')
   .then(({ setupShortcut }) => {

@@ -1,0 +1,184 @@
+/* Layout: full-bleed 100dvh story. Progress bars on top, headline and slide visual in the middle,
+   tutor bust standing behind a dialogue panel, fine-print hint, then the grass running under the home indicator. */
+:host{
+  color-scheme:dark;
+  --bg:#0A141C; --surface:#14232E; --surface2:#1B2F3D; --line:#2A4152;
+  --text:#EAF4EE; --muted:#9DB3BD;
+  --mint:#6AF4BF; --mint-d:#2FB88A; --banana:#FFE135; --soil:#37150d;
+  --serif:"Hedvig Letters Serif",Georgia,"Times New Roman",serif;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --cut-l:14px; --cut-s:8px;
+  --snip:polygon(0 0,100% 0,100% calc(100% - var(--cut-l)),calc(100% - var(--cut-l)) 100%,0 100%);
+  --snip-s:polygon(0 0,100% 0,100% calc(100% - var(--cut-s)),calc(100% - var(--cut-s)) 100%,0 100%);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+:host{display:block;height:100vh;height:100dvh;margin:0;padding:0;overflow:hidden;overscroll-behavior:none}
+[hidden]{display:none!important}
+:host{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:1rem;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,p{margin:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--banana);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- story shell ---------- */
+.story{
+  position:fixed;inset:0;height:100vh;height:100dvh;
+  display:flex;flex-direction:column;background:var(--bg);overflow:hidden;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+.story img,.story canvas{pointer-events:none;-webkit-user-drag:none}
+.specks{position:absolute;inset:0;pointer-events:none}
+.specks::before{content:"";position:absolute;left:0;top:0;width:4px;height:4px;background:transparent;
+  box-shadow:
+    8vw 14dvh 0 0 rgba(234,244,238,.10),88vw 9dvh 0 0 rgba(234,244,238,.08),22vw 31dvh 0 0 rgba(234,244,238,.07),
+    71vw 26dvh 0 0 rgba(234,244,238,.12),47vw 18dvh 0 0 rgba(234,244,238,.06),93vw 44dvh 0 0 rgba(234,244,238,.09),
+    5vw 52dvh 0 0 rgba(234,244,238,.08),36vw 61dvh 0 0 rgba(234,244,238,.06),82vw 66dvh 0 0 rgba(234,244,238,.10),
+    14vw 78dvh 0 0 rgba(234,244,238,.07),60vw 8dvh 0 0 rgba(234,244,238,.09),55vw 47dvh 0 0 rgba(234,244,238,.05)}
+
+.top{flex:none;position:relative;z-index:3;
+  padding:calc(env(safe-area-inset-top,0px) + 10px) max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px))}
+.bars{display:flex;gap:4px;max-width:30rem;margin:0 auto}
+.bars i{flex:1;height:3px;background:rgba(234,244,238,.22);overflow:hidden}
+.bars b{display:block;height:100%;background:var(--mint);transform-origin:left;transform:scaleX(0)}
+
+.col{position:relative;z-index:2;flex:1;min-height:0;display:flex;flex-direction:column;width:100%;max-width:30rem;margin:0 auto;
+  padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}
+.slide{flex:1;min-height:0;display:flex;flex-direction:column}
+.slide-top{flex:1;min-height:0;display:flex;flex-direction:column;gap:1.1rem;padding-top:1.6rem;overflow-y:auto;scrollbar-width:none;touch-action:pan-y}
+.slide-top::-webkit-scrollbar{display:none}
+.slide-top>*{flex:none}
+.hd{font-family:var(--serif);font-weight:400;letter-spacing:-.01em;line-height:1.06;font-size:clamp(1.9rem,8.4vw,2.6rem);text-wrap:balance;animation:enter .45s var(--ease) both}
+
+/* ---------- tutor + dialogue ---------- */
+.dialogue{flex:none;position:relative;margin-top:.5rem}
+.portrait{--pw:clamp(7.5rem,27dvh,14.5rem);display:block;width:var(--pw);aspect-ratio:1;margin:0 auto calc(var(--pw) * -.22);position:relative;z-index:1;
+  background-repeat:no-repeat;background-size:200% 200%;image-rendering:pixelated;animation:pop .24s steps(3,end) both}
+.portrait.charles{background-image:url("../tutor/assets/charles-poses.webp")}
+.portrait.linda{background-image:url("../tutor/assets/linda-poses.webp")}
+.slide.solo .portrait{--pw:clamp(9rem,41dvh,19rem)}
+.pose-greeting{background-position:0 0}
+.pose-explaining{background-position:100% 0}
+.pose-thinking{background-position:0 100%}
+.pose-encouraging{background-position:100% 100%}
+.panel{position:relative;z-index:2;clip-path:var(--snip);padding:.8rem 1.25rem 1.15rem 1.05rem;border-left:.25rem solid var(--mint);
+  background:linear-gradient(120deg,rgb(35 66 69 / .97),rgb(20 35 46 / .97) 70%)}
+.who{display:block;font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mint)}
+.panel p{margin-top:.25rem;font-size:.975rem;line-height:1.45}
+
+/* ---------- hint + ground ---------- */
+.hint{flex:none;text-align:center;font-size:.75rem;line-height:1.3;color:var(--muted);padding:.6rem 0 .7rem;min-height:2.1rem}
+.story.is-held .hint{color:var(--mint);font-weight:600}
+.ground{flex:none;position:relative;z-index:2;--g:clamp(36px,10dvh,82px);
+  height:calc(var(--g) + env(safe-area-inset-bottom,0px));
+  background:url("../assets/lumino-grass-soil.webp") left top / auto var(--g) repeat-x,var(--soil);image-rendering:pixelated}
+
+/* ---------- slide visuals ---------- */
+.steps{list-style:none;margin:.3rem 0 0;padding:0;display:grid;gap:.95rem}
+.steps li{display:flex;gap:.85rem;align-items:flex-start;opacity:0;animation:fall .6s cubic-bezier(.3,1.25,.55,1) both}
+.steps li:nth-child(1){animation-delay:.15s}.steps li:nth-child(2){animation-delay:.5s}.steps li:nth-child(3){animation-delay:.85s}
+.num{flex:none;display:grid;place-items:center;width:2.125rem;height:2.125rem;background:var(--mint);color:#06131A;font-family:var(--serif);font-size:1.2rem;clip-path:var(--snip-s)}
+.steps h2{font-family:var(--serif);font-size:1.2rem;line-height:1.2;font-weight:400}
+.steps p{color:var(--muted);font-size:.9375rem;line-height:1.4}
+
+.cast{display:flex;align-items:flex-end;justify-content:flex-start;gap:1.6rem;padding-top:.4rem}
+.bob{animation:bob 1s steps(2,end) infinite}
+canvas.px{image-rendering:pixelated;display:block}
+
+.ex{width:fit-content;background:var(--surface);padding:.7rem 1.1rem;clip-path:var(--snip);font:1.3rem/1.55 var(--serif);color:var(--mint)}
+.ex span{display:block;opacity:0;animation:enter .4s var(--ease) both}
+.ex span:nth-child(2){animation-delay:.7s}.ex span:nth-child(3){animation-delay:1.4s}.ex span:nth-child(1){animation-delay:.1s}
+.blocks{display:flex;align-items:flex-end;gap:3px;min-height:92px}
+.blocks i{width:34px;background:var(--mint-d);border-top:6px solid var(--mint);animation:drop .35s steps(4,end) both}
+.blocks i:nth-child(1){height:24px}.blocks i:nth-child(2){height:40px;animation-delay:.15s}.blocks i:nth-child(3){height:56px;animation-delay:.3s}
+.blocks i:nth-child(4){height:72px;animation-delay:.45s}.blocks i:nth-child(5){height:88px;animation-delay:.6s}
+
+.sandbox{position:relative;height:124px;width:100%;max-width:23rem;background:var(--surface);clip-path:var(--snip);overflow:hidden;animation:enter .45s var(--ease) both}
+.sandbox .land{position:absolute;bottom:0;height:34px;width:33%;background:var(--mint-d);border-top:6px solid var(--mint)}
+.sandbox .land.a{left:0}.sandbox .land.b{right:0}
+.sandbox .plank{position:absolute;bottom:22px;left:33%;width:8.5%;height:12px;background:var(--banana);border-top:3px solid #fff3a0;animation:drop .35s steps(4,end) both}
+.sandbox .plank:nth-of-type(1){left:33%;animation-delay:.5s}.sandbox .plank:nth-of-type(2){left:41.5%;animation-delay:.9s}
+.sandbox .plank:nth-of-type(3){left:50%;animation-delay:1.3s}.sandbox .plank:nth-of-type(4){left:58.5%;animation-delay:1.7s}
+.sandbox .hero{position:absolute;bottom:34px;left:8%;animation:walk 1.9s steps(9,end) 2.4s both}
+.sandbox .goal{position:absolute;bottom:34px;right:9%}
+@keyframes walk{to{left:72%}}
+.icons{display:flex;align-items:flex-end;gap:1.1rem}
+.icons img{display:block;image-rendering:pixelated;object-fit:contain;animation:pop .3s steps(3,end) both}
+.icons img:nth-child(2){animation-delay:.2s}.icons img:nth-child(3){animation-delay:.4s}
+
+/* ---------- tutor choice + buttons ---------- */
+.choices{display:grid;gap:.6rem}
+.pick{display:flex;align-items:center;gap:.85rem;width:100%;text-align:left;min-height:4rem;padding:.5rem .9rem .5rem .6rem;cursor:pointer;border:0;
+  background:var(--line);clip-path:var(--snip);position:relative;isolation:isolate;animation:enter .4s var(--ease) both}
+.pick::before{content:"";position:absolute;inset:2px;z-index:-1;clip-path:var(--snip);background:var(--surface)}
+.pick[aria-pressed="true"]{background:var(--mint)}
+.pick[aria-pressed="true"]::before{background:var(--surface2)}
+.pick:nth-child(2){animation-delay:.1s}
+.thumb{flex:none;width:3rem;height:3rem;background-size:300% 100%;background-position:0 0;background-repeat:no-repeat;image-rendering:pixelated;background-color:#10232d}
+.thumb.charles{background-image:url("../tutor/assets/charles.webp")}
+.thumb.linda{background-image:url("../tutor/assets/linda.webp")}
+.pick b{display:block;font-weight:600}
+.pick small{display:block;color:var(--muted);font-size:.8125rem}
+.cta{display:inline-flex;align-items:center;justify-content:center;min-height:2.9rem;padding:.35rem 1.35rem;border:0;cursor:pointer;
+  background:var(--mint);color:#06131A;font-weight:700;clip-path:var(--snip-s);align-self:stretch}
+.cta:active{filter:brightness(.92)}
+.cta.nudge{animation:nudge .4s steps(6,end)}
+
+
+/* ---------- setup flow (subject, level, preparing, plan) ---------- */
+.flow{position:fixed;inset:0;height:100vh;height:100dvh;z-index:4;display:flex;flex-direction:column;background:var(--bg);overflow:hidden;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+.fl-top,.fl-body,.fl-foot{position:relative;z-index:1;width:100%;max-width:30rem;margin-inline:auto;flex:none}
+.fl-top{padding:calc(env(safe-area-inset-top,0px) + 6px) max(8px,env(safe-area-inset-right,0px)) 0 max(8px,env(safe-area-inset-left,0px));min-height:calc(env(safe-area-inset-top,0px) + 52px)}
+.back{display:grid;place-items:center;width:44px;height:44px;background:none;border:0;color:var(--mint);font-size:1.5rem;line-height:1;cursor:pointer}
+.back[hidden]{display:none}
+.fl-body{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:none;display:flex;flex-direction:column;gap:1.1rem;
+  padding:.5rem max(18px,env(safe-area-inset-right,0px)) 1rem max(18px,env(safe-area-inset-left,0px))}
+.fl-body::-webkit-scrollbar{display:none}
+.fl-body>*{flex:none}
+.fl-foot{display:grid;gap:.35rem;text-align:center;
+  padding:.4rem max(18px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 14px) max(18px,env(safe-area-inset-left,0px))}
+.fl-foot:empty{display:none}
+.fine{font-size:.8125rem;line-height:1.4;color:var(--muted)}
+.fl-body .dialogue{margin-top:auto}
+.sub-ic{flex:none;width:2.75rem;height:2.75rem;object-fit:contain;image-rendering:pixelated}
+.pick.level{align-items:flex-start;padding-block:.75rem;min-height:4.4rem}
+.pick.level b{font-family:var(--serif);font-weight:400;font-size:1.2rem;line-height:1.2}
+.pick.level small{margin-top:.2rem;line-height:1.35}
+.pick{animation-delay:calc(var(--i,0) * 70ms)}
+.checks{list-style:none;margin:.2rem 0 0;padding:0;display:grid;gap:.8rem}
+.checks li{display:flex;align-items:center;gap:.75rem;color:var(--muted);transition:color .2s}
+.checks li.on{color:var(--text)}
+.tick{flex:none;width:1.5rem;height:1.5rem;display:grid;place-items:center;background:var(--surface2);clip-path:var(--snip-s)}
+.tick svg{width:.95rem;height:.95rem;opacity:0}
+.checks li.on .tick{background:var(--mint)}
+.checks li.on .tick svg{opacity:1}
+.seg{display:flex;gap:3px}
+.seg i{flex:1;height:10px;background:var(--surface2)}
+.seg i.on{background:var(--mint)}
+.plan{background:var(--surface);clip-path:var(--snip);padding:1rem 1.05rem 1.15rem;display:grid;gap:.9rem;animation:enter .45s var(--ease) both}
+.plan-head{display:flex;align-items:center;gap:.85rem}
+.plan-head b{display:block;font-family:var(--serif);font-weight:400;font-size:1.35rem;line-height:1.15}
+.plan-head small{color:var(--mint);font-weight:600;font-size:.8125rem}
+.plan ul{list-style:none;margin:0;padding:0;display:grid;gap:.55rem}
+.plan li{display:flex;gap:.6rem;font-size:.9375rem;line-height:1.4}
+.plan li::before{content:"";flex:none;width:.5rem;height:.5rem;margin-top:.45rem;background:var(--mint)}
+.plan-tutor{display:flex;align-items:center;gap:.6rem;color:var(--muted);font-size:.875rem}
+.plan-tutor .thumb{width:2.25rem;height:2.25rem}
+.cta.banana{background:var(--banana);color:#1A1600;gap:.55rem;text-align:center;line-height:1.25;padding-block:.6rem}
+.cta.banana img{width:1.35rem;height:1.6rem;object-fit:contain;image-rendering:pixelated;flex:none}
+
+/* ---------- end state ---------- */
+.textbtn{background:none;border:0;padding:.5rem .6rem;min-height:2.75rem;color:var(--mint);font-weight:600;cursor:pointer}
+
+@keyframes enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes fall{0%{opacity:0;transform:translateY(-22px)}55%{opacity:1}100%{opacity:1;transform:none}}
+@keyframes bob{50%{transform:translateY(-4px)}}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes drop{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:none}}
+@keyframes nudge{0%,100%{transform:none}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;animation-delay:0ms!important}
+  .bob{animation:none!important}
+}

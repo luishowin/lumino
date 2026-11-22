@@ -14,9 +14,21 @@ That practice also builds judgment for working with AI. Learners should be able 
 
 The prototype pairs learners with Linda or Charles. A short, optional confidence check can suggest a starting level. Each subject has a four-level Learn roadmap with tappable previews and a button for the next playable lesson. Physics has eight Motion lessons. Mathematics, Chemistry, Biology and English each have a starter lesson. Progress, XP and streaks are saved on this device. Ranks shows the streak calendar, goals, trophies and sample league.
 
-The first new lesson started each day activates a 30-minute double-XP boost. In Practise, Physics learners can review skills they missed on two different questions in the past 14 days. Three consecutive correct answers on distinct questions clear the skill from the review list. The other subjects offer starter review.
+The first new lesson started each day activates a 30-minute double-XP boost. In Practise, learners can review skills they missed on two different questions in the past 14 days. Three consecutive correct answers on distinct questions clear the skill from the review list. Physics review generates fresh questions. The other four subjects revisit their starter quizzes.
 
 The **You** tab shows your learning summary, selected subjects and tutor. You can edit your display name, choose from four pixel-art avatars, and manage your daily goal, reminders, lesson hints, read-aloud, text size, motion and sample-league visibility. These settings stay in the current browser. Reminders appear in Learn while Lumino is open, and read-aloud uses the browser’s speech support. The guardian preview walks through a demo PIN and a read-only dashboard using sample learner data.
+
+## Story lessons
+
+Each of the 12 playable lessons moves through Introduction, Goal, Definitions, Concept, Examples, Test, Summary and Sandbox. Learners tap the card edges, use the arrow keys or choose Back and Next. Six multiple-choice questions contribute to the score. A seventh question invites a typed or dictated explanation and shows a model answer for comparison. The Sandbox button reads “Coming soon”. Activities in Examples return to the same card.
+
+### Add a lesson
+
+1. Copy a lesson module from `lumino-app/lessons/<subject>/` and give the file and its exported record the same permanent lesson ID. Set its subject, roadmap level, title and estimated minutes.
+2. Supply the hook, two or three goals, three to five definitions, two to five concepts with alternate explanations, and two to four examples including a worked problem and a real-world application. Give each example and concept a tutor line.
+3. Write seven to ten quiz items, including one or two explanations with model answers. Give each graded question four distinct choices, a zero-based correct index and feedback. Use permanent question IDs and a registered skill with at least two distinct graded questions per lesson. The skill registry uses Motion skill IDs for Physics and starter curriculum topic IDs for the other four subjects.
+4. Add three to five takeaways and a key rule or formula. Set `sandbox` to `null`. Register the module in `lumino-app/lessons/index.mjs` and link it from the appropriate roadmap. Physics uses the skill groups and ordered list in `physics-motion.mjs`.
+5. Add its URL to `sw.js`, bump the cache, update the migration checklist and request educational review. Run `npm run check` for schema and catalogue checks and `npm test` for behaviour.
 
 ## Run locally
 

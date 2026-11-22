@@ -2,18 +2,24 @@
 
 **Last updated 23 November 2026**
 
-Lumino’s first public prototype is live. The learning loop is **Learn → Apply → Recall**, with **“Build your way through this”** as the direction for the exploration game. [Open the live prototype](https://luishowin.github.io/lumino/lumino-app/)
+Lumino’s first public prototype is live. The local build uses eight-section story lessons, with **“Build your way through this”** as the direction for the exploration game. [Open the live prototype](https://luishowin.github.io/lumino/lumino-app/)
 
 ## Current prototype
 
 - Learners choose Linda or Charles, take a short confidence check and get a suggested starting point. The tutors use scripted explanations and hints.
-- Mathematics, Physics, Chemistry, Biology and English each have one playable starter lesson. Subject roadmaps preview topics for future lessons.
+- Physics has eight playable Motion lessons. Mathematics, Chemistry, Biology and English each have one playable starter lesson. Subject roadmaps preview topics for future lessons.
 - Six landscape trails include the Rice Fields bridge build and the canyon relay. Chemistry and Biology offer optional trail activities alongside their starter lessons.
 - Profile shows the learner’s actual XP, streak, completed starters and trophies, with editable name and avatar, subject plans and tutor selection. Settings cover local goals, reminders, lesson help, display preferences and the sample league.
 - The read-only guardian preview uses two sample learners. Guardian invitations, household accounts, enforcement of limits, and sound and music are future work.
 - Progress, XP and streaks are saved on the learner’s device. The prototype can work offline after a successful first load. The public site runs on GitHub Pages from `main`.
 
 The Physics and Chemistry gadget-building game, Biology Lab, Math Playground, English spaced practice and live AI tutoring are planned. Accounts, payments and full syllabus coverage are also future work.
+
+## Story lessons · local build, 23 November 2026
+
+All twelve lessons now use the shared story player. Each has worked and real-world examples, six scored choices, an ungraded explanation with a model answer, and a summary. Typed responses work without speech support. The player retains answers when moving back and returns learners to the same example after an optional trail or workshop. Sandbox is marked “Coming soon”.
+
+The v4 storage key and lesson IDs carry forward. Historical best scores retain their original denominators, earlier starter misses join the matching curriculum skill, and existing completions keep their XP. The offline cache is `lumino-v59`. Browser walkthroughs completed all twelve lessons, including Biology after an offline reload. Optional activity returns were checked for Cart Workshop, Rice Fields and the canyon relay. All twelve lessons still need educational review. See the [lesson checklist](docs/lesson-migration-plan.md).
 
 ## Interface update · 22 November 2026
 
@@ -30,7 +36,7 @@ The Physics and Chemistry gadget-building game, Biology Lab, Math Playground, En
 
 ## PWA icons · 23 November 2026
 
-- The installed app icons now use a white background: 192px and 512px any-purpose icons, a safe-zone maskable icon and a 180px Apple touch icon generated from the voxel mark. The transparent in-app logo and favicon are unchanged. The offline cache is now `lumino-v54`.
+- The installed app icons now use a white background: 192px and 512px any-purpose icons, a safe-zone maskable icon and a 180px Apple touch icon generated from the voxel mark. The transparent in-app logo and favicon are unchanged. That release used offline cache `lumino-v54`.
 
 ## Curriculum progress
 

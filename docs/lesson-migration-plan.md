@@ -22,3 +22,9 @@ Use one ES module per lesson with stable id, subject, level, title and estimated
 | Open with a topic sentence | English | 7 | 1 | needs educational review |
 
 Check quiz locking, review thresholds, score migration, speech fallback and the offline module graph. Verify completion through the roadmap for every subject.
+
+## Verification
+
+All 12 lessons passed schema validation and completed through the local browser player. The checks covered small-screen and desktop layouts, quiz locking, answer retention, both tutor portraits and optional activity returns. Biology completed offline after the service worker took control. Typed explanations worked with speech recognition unavailable. A simulated transcript exercised the dictation callback. Live microphone capture still needs a device check.
+
+The 29 automated tests passed. The existing v4 key carries forward. Saved results without a denominator use their original scale (six questions for Motion and two for the other starters). Replays compare fractions, and the first-completion reward still applies once.

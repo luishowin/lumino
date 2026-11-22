@@ -49,9 +49,9 @@ test('each taught skill can enter and clear review on distinct questions', () =>
     assert.deepEqual(active(), []);
     log(1, false);
     assert.deepEqual(active(), [q[1].skillId]);
-    log(2, true); log(2, true); log(3, true);
+    log(0, true); log(0, true); log(1, true);
     assert.equal(active().length, 1);
-    log(4, true);
+    log(2, true);
     assert.deepEqual(active(), []);
   }
 });

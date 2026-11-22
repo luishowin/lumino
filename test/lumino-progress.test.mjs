@@ -1,9 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { cartTrial } from '../lumino-app/cart-workshop.mjs';
-import { SUBJECTS } from '../lumino-app/curriculum.mjs';
 import { getPracticeSession, MOTION_LESSONS, MOTION_SKILLS } from '../lumino-app/physics-motion.mjs';
-import { roadmapBands } from '../lumino-app/roadmap.mjs';
 import {
   PROGRESS_KEY, boostRemaining, clearProgress, completeLesson, currentStreak,
   freshProgress, loadProgress, localDay, recordAnswer, saveProgress, startDailyBoost, starterLessonId, weakSkills,
@@ -210,13 +208,7 @@ test('two distinct recent misses surface a skill and three distinct correct answ
   assert.deepEqual(state.lessonResults, {});
 });
 
-test('roadmap nodes resolve in every subject and each Physics review has distinct valid questions', () => {
-  for (const subject of SUBJECTS) {
-    const bands = roadmapBands(subject);
-    assert.equal(bands.length, 4);
-    assert.equal(bands[0].nodes[0].id, subject.starterTopic);
-    assert.equal(bands.flatMap(band => band.nodes).filter(node => node.type === 'topic' && node.available).length, 1);
-  }
+test('each Physics review has distinct valid questions', () => {
   assert.equal(MOTION_LESSONS.length, 8);
   const taughtIds = new Set();
   for (const content of MOTION_LESSONS) {

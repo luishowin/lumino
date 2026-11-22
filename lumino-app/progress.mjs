@@ -1,6 +1,7 @@
 import { TROPHIES } from './content.mjs?v=59';
 import { LEVELS, SUBJECTS, subjectById, topicById } from './curriculum.mjs?v=34';
-import { PHYSICS_STARTER } from './physics-motion.mjs?v=59';
+import { byId, stories } from './lessons/index.mjs';
+import { MOTION_LESSONS, PHYSICS_STARTER } from './physics-motion.mjs?v=59';
 
 export const PROGRESS_KEY = 'lumino.app.v4';
 const ROADMAP_KEY = 'lumino.app.v3';
@@ -82,7 +83,7 @@ export function freshProgress() {
     tutor: null, subject: null, plans: {}, completed: [], previous: [],
     onboarded: false, xp: 0, streak: 0, bestStreak: 0, lastDay: null,
     days: [], recharges: 0, rechargeGiven: false, commit: null,
-    lessonResults: {}, gameResults: {}, answerHistory: [], practiceSerial: 0,
+    roadmapStarts: {}, lessonResults: {}, gameResults: {}, answerHistory: [], practiceSerial: 0,
     boostDay: null, boostUntil: 0,
     profile: normalizeProfile(),
   };
@@ -170,13 +171,36 @@ function normalize(saved, readPlan = validPlan) {
   return state;
 }
 
+// The previous daily button used a different order from the skill-group menu.
+function restoreRoadmapStarts(state, savedStarts) {
+  for (const { id: sid } of SUBJECTS) {
+    if (savedStarts && typeof savedStarts === 'object') {
+      const saved = byId.get(savedStarts[sid]);
+      if (saved?.subject === sid) state.roadmapStarts[sid] = saved.id;
+      continue;
+    }
+    const previous = sid === 'physics' ? MOTION_LESSONS : [byId.get(starterLessonId(sid))];
+    const used = previous.some(l => state.lessonResults[l.id]) || state.plans[sid] || (state.onboarded && state.subject === sid);
+    if (!used) continue;
+    const next = previous.find(l => !state.lessonResults[l.id]) ??
+      stories.find(l => l.subject === sid && l.kind === 'introduction' && l.level === 'beginner-plus');
+    state.roadmapStarts[sid] = next.id;
+  }
+}
+
 export function loadProgress(storage) {
   const saved = read(storage, PROGRESS_KEY);
-  if (saved) return normalize(saved);
+  if (saved) {
+    const state = normalize(saved);
+    restoreRoadmapStarts(state, saved.roadmapStarts);
+    if (!saved.roadmapStarts) saveProgress(storage, state);
+    return state;
+  }
 
   const roadmap = read(storage, ROADMAP_KEY);
   if (roadmap) {
     const state = normalize(roadmap, migratePlan);
+    restoreRoadmapStarts(state);
     saveProgress(storage, state);
     return state;
   }
@@ -203,7 +227,10 @@ export function loadProgress(storage) {
     state.onboarded ||= legacy.intro === true;
     state.previous = subjectList(legacy.complete);
   }
-  if (demo || legacy) saveProgress(storage, state);
+  if (demo || legacy) {
+    restoreRoadmapStarts(state);
+    saveProgress(storage, state);
+  }
   return state;
 }
 

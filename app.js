@@ -4,11 +4,11 @@ import { mountStory, storySession } from './lumino-app/story-lesson.mjs';
 import { LESSONS, RIVALS, TROPHIES, TUTORS, TUTOR_HELP } from './lumino-app/content.mjs?v=59';
 import { LEVELS, SUBJECTS, subjectById, topicById } from './lumino-app/curriculum.mjs?v=34';
 import { drawSky, hydrate, spr, uiIcon } from './lumino-app/pixel-art.mjs?v=31';
-import { boostRemaining, clearProgress, completeLesson, currentStreak, freshProgress, loadProgress, localDay, recordAnswer, saveProgress, startDailyBoost, starterLessonId, weakSkills } from './lumino-app/progress.mjs?v=59';
-import { displayName, escapeHTML, mountProfile } from './lumino-app/profile.mjs?v=59';
+import { boostRemaining, clearProgress, completeLesson, currentStreak, freshProgress, loadProgress, localDay, recordAnswer, saveProgress, startDailyBoost, weakSkills } from './lumino-app/progress.mjs?v=60';
+import { displayName, escapeHTML, mountProfile } from './lumino-app/profile.mjs?v=60';
 import { bindWorkshop, workshopMarkup } from './lumino-app/cart-workshop.mjs?v=34';
-import { drawDistanceGraph, getPracticeSession, MOTION_LESSONS, MOTION_SKILLS, motionSkillFor } from './lumino-app/physics-motion.mjs?v=59';
-import { CART_ID, drawRoadmap, mapMarkup, roadmapBands } from './lumino-app/roadmap.mjs?v=59';
+import { drawDistanceGraph, getPracticeSession, MOTION_SKILLS, motionSkillFor } from './lumino-app/physics-motion.mjs?v=59';
+import { CART_ID, centerCurrentLesson, currentLesson, drawRoadmap, mapMarkup, roadmapBands } from './lumino-app/roadmap.mjs?v=62';
 import { bindPractiseHome, bindSession, clearSessions, loadSessions, newSession, practiseHomeMarkup, saveSessions, sessionMarkup, sessionTitle, suggestionsFor } from './lumino-app/practise.mjs?v=59';
 import { createMockTutor } from './lumino-app/tutor-client.mjs?v=59';
 
@@ -278,7 +278,7 @@ function welcome() {
     },
     onFinish(action) {
       if (action === 'start') {
-        lesson(state.subject, { fromOffer: true, welcomeReward: !state.rechargeGiven });
+        lesson(state.subject, { content: nextLesson(selectedSubject())?.content, fromOffer: true, welcomeReward: !state.rechargeGiven });
       } else {
         state.profile.since ??= localDay();
         state.onboarded = true;
@@ -308,6 +308,7 @@ function bindTutorChoices(node, onChoose) {
 
 function chooseTopic(subject, returnTab, focusedTopic) {
   const plan = state.plans[subject.id];
+  const liveTopics = new Set(roadmapBands(subject).map(band => band.id));
   const openTopic = focusedTopic ?? plan?.topicId ?? subject.starterTopic;
   const node = screen('Choose your topic', `<p class="muted">${subject.name}</p>
     <div class="topic-groups">${subject.groups.map(group => {
@@ -316,7 +317,7 @@ function chooseTopic(subject, returnTab, focusedTopic) {
         <summary>${group.name}</summary>
         <div class="choices">${group.topics.map(topic => {
           const level = LEVELS.find(item => item.id === plan?.levels[topic.id]);
-          const label = level?.name ?? (topic.id === subject.starterTopic ? 'Starter lesson available' : '');
+          const label = level?.name ?? (liveTopics.has(topic.id) ? 'Introduction available' : '');
           return `<button type="button" class="choice" data-topic="${topic.id}">
             <span><b>${topic.name}</b>${label ? `<small>${label}</small>` : ''}</span></button>`;
         }).join('')}</div>
@@ -329,8 +330,9 @@ function chooseTopic(subject, returnTab, focusedTopic) {
   }
 }
 
-function starterAvailable(subject, topic, level) {
-  return subject.starterTopic === topic.id && level.id === 'beginner';
+function levelAvailability(subject, topic, level) {
+  return roadmapBands(subject).some(band => band.id === topic.id && band.level.id === level.id)
+    ? 'Introduction available' : 'Lesson coming soon';
 }
 
 function chooseLevel(subject, topic, returnTab, recommendation) {
@@ -342,7 +344,7 @@ function chooseLevel(subject, topic, returnTab, recommendation) {
     <div class="choices" role="group" aria-label="Starting level">${LEVELS.map(level => {
       const recommended = recommendation === level.id;
       const note = recommended ? ' · Recommended' : saved === level.id ? ' · Your current level' : '';
-      const availability = starterAvailable(subject, topic, level) ? 'Starter lesson available' : 'Lesson coming soon';
+      const availability = levelAvailability(subject, topic, level);
       return `<button type="button" class="choice level-choice${recommended ? ' level-recommended' : ''}" data-level="${level.id}">
         <span><b>${level.name}</b><small>${level.description}</small>
           <span class="level-goal">${topic.goals[level.id]}</span>
@@ -397,14 +399,12 @@ function confidenceCheck(subject, topic, returnTab) {
   draw();
 }
 
-function topicPlanCard(subject, topic, level, offerLesson = false) {
-  const ready = level && starterAvailable(subject, topic, level);
+function topicPlanCard(subject, topic, level) {
   return `<article class="card topic-plan">
     <span class="tag-label">${level?.name ?? 'Starting level to choose'}</span>
     <h3>${topic.name}</h3>
     ${level ? `<p>${topic.goals[level.id]}</p>
-      ${ready && offerLesson ? `<button type="button" class="textbtn" data-topic-lesson>${LESSONS[subject.id].title} →</button>`
-        : `<span class="tag">${ready ? 'Starter lesson available' : 'Lesson coming soon'}</span>`}` : ''}
+      <span class="tag">${levelAvailability(subject, topic, level)}</span>` : ''}
   </article>`;
 }
 
@@ -449,7 +449,7 @@ function lesson(sid, options = {}) {
     const node = mount('<section class="screen lesson-story" aria-label="Lesson"></section>');
     dispose = mountStory(node, content, session, {
       person: tutor(), dialogue: tutorDialogue, profile: state.profile, drawGraph: drawDistanceGraph,
-      hint: skill?.hints[tutor().id] ?? TUTOR_HELP[sid][tutor().id][0],
+      hint: content.kind === 'introduction' ? content.concept[0].tutorLine : skill?.hints[tutor().id] ?? TUTOR_HELP[sid][tutor().id][0],
       exit: fromOffer ? welcome : () => home(returnTab),
       switchTutor() {
         state.tutor = tutor().id === 'linda' ? 'charles' : 'linda';
@@ -463,7 +463,7 @@ function lesson(sid, options = {}) {
       },
       answer(question, choice) {
         recordAnswer(state, {
-          questionId: question.id, subject: sid, topicId: subject.starterTopic,
+          questionId: question.id, subject: sid, topicId: content.topicId ?? subject.starterTopic,
           subtopicId: question.skillId, skillTag: question.skillId,
           givenAnswer: question.options[choice], right: choice === question.answer,
         });
@@ -690,7 +690,7 @@ function home(tab) {
   }
   focusHeading(body);
   const disposeReminder = tab === 'learn' ? bindLearningReminder(body) : undefined;
-  if (tab === 'learn') scrollport.scrollTop = scrollport.scrollHeight;
+  if (tab === 'learn') centerCurrentLesson(scrollport);
   const disposeDock = bindDock(node, scrollport, body);
   const disposeBoost = bindBoost(node, tab === 'learn');
   dispose = () => {
@@ -734,8 +734,7 @@ function bindSubjects(body, tab) {
 }
 
 function nextLesson(subject) {
-  const lessons = subject.id === 'physics' ? MOTION_LESSONS : [{ id: starterLessonId(subject.id) }];
-  return lessons.find(item => !state.lessonResults[item.id]);
+  return currentLesson(roadmapBands(subject), state.lessonResults, state.roadmapStarts[subject.id]);
 }
 
 function bindBoost(node, isLearn) {
@@ -763,39 +762,13 @@ function bindBoost(node, isLearn) {
 
   if (daily) daily.onclick = () => {
     const subject = selectedSubject();
-    if (next) lesson(subject.id, subject.id === 'physics' ? { content: next } : {});
+    if (next) lesson(subject.id, { content: next.content });
     else if (subject.id === 'physics') startPractice(MOTION_SKILLS[1], 'learn');
     else lesson(subject.id, { practice: true });
   };
   refresh();
   const timer = setInterval(refresh, 1_000);
   return () => clearInterval(timer);
-}
-
-function openMapSheet(body, item, subject) {
-  const physics = subject.id === 'physics';
-  const collection = physics ? MOTION_SKILLS : [{
-    title: LESSONS[subject.id].title,
-    lessons: [{ id: starterLessonId(subject.id), title: LESSONS[subject.id].title }],
-  }];
-  const sheet = element(`<dialog class="map-sheet" aria-labelledby="map-sheet-title">
-    <form method="dialog" class="sheet-close"><button class="textbtn" autofocus>Close</button></form>
-    <h2 id="map-sheet-title">${item.title}</h2><p class="muted">${item.detail}</p>
-    ${item.available ? `<div class="sheet-skills">${collection.map(skill => `
-      <section><h3>${skill.title}</h3><div class="choices">${skill.lessons.map(item => `
-        <button class="choice" type="button" data-open-lesson="${item.id}"><b>${item.title}</b>
-          <small>${state.lessonResults[item.id] ? 'Completed · Review' : 'Start lesson'}</small></button>`).join('')}</div></section>`).join('')}</div>`
-      : '<p class="sheet-soon">Available soon</p>'}</dialog>`);
-  sheet.addEventListener('close', () => sheet.remove(), { once: true });
-  body.append(sheet);
-  sheet.showModal();
-  for (const button of sheet.querySelectorAll('[data-open-lesson]')) {
-    button.addEventListener('click', () => {
-      sheet.close();
-      const content = physics ? MOTION_LESSONS.find(item => item.id === button.dataset.openLesson) : undefined;
-      lesson(subject.id, { content });
-    });
-  }
 }
 
 function launchWorkshop(back = () => home('learn'), backLabel = 'Back to the roadmap') {
@@ -817,24 +790,29 @@ function launchWorkshop(back = () => home('learn'), backLabel = 'Back to the roa
 
 function learnTab(body) {
   const subject = selectedSubject();
-  const plan = state.plans[subject.id];
-  const placement = plan?.levels[plan.topicId];
-  const upcoming = nextLesson(subject);
-  const motionSubtopic = subject.id === 'physics' ? (motionSkillFor(upcoming?.id) ?? MOTION_SKILLS[1]).title : undefined;
-  const bands = roadmapBands(subject, motionSubtopic);
+  const bands = roadmapBands(subject);
+  const current = currentLesson(bands, state.lessonResults, state.roadmapStarts[subject.id]);
   body.innerHTML = `<div class="roadmap-controls">${subjectTabs(subject)}</div>
-    ${mapMarkup(subject, bands, { placement, finished: !upcoming, gameResults: state.gameResults })}`;
+    ${mapMarkup(subject, bands, state, current)}<div class="map-toast" role="status"></div>`;
   bindSubjects(body, 'learn');
-  const nodes = bands.flatMap(band => band.nodes);
-  for (const button of body.querySelectorAll('[data-map-node]')) {
-    const item = nodes.find(node => node.id === button.dataset.mapNode);
-    button.addEventListener('click', () => {
-      if (item.id === CART_ID) launchWorkshop();
-      else if (item.id.startsWith('trail-')) openTrail(item.id.slice(6));
-      else openMapSheet(body, item, subject);
-    });
-  }
-  return drawRoadmap(body.querySelector('.roadmap'));
+  const nodes = new Map(bands.flatMap(band => band.nodes).map(node => [node.id, node]));
+  const map = body.querySelector('.roadmap');
+  const toast = body.querySelector('.map-toast');
+  let timer;
+  map.addEventListener('click', event => {
+    const item = nodes.get(event.target.closest('[data-map-node]')?.dataset.mapNode);
+    if (!item?.id) return;
+    if (item.type === 'lesson') lesson(subject.id, { content: item.content });
+    else if (item.id === CART_ID) launchWorkshop();
+    else if (item.type === 'game') openTrail(item.id.slice('trail-'.length));
+    else {
+      clearTimeout(timer);
+      toast.textContent = item.type === 'end' ? 'More topics are on the way.' : `${item.title} is coming soon.`;
+      timer = setTimeout(() => { toast.textContent = ''; }, 2000);
+    }
+  });
+  const disconnect = drawRoadmap(map);
+  return () => { disconnect(); clearTimeout(timer); };
 }
 
 function startPractice(skill, returnTab = 'practise') {
@@ -903,7 +881,11 @@ function practiseTab(body) {
       const skill = MOTION_SKILLS.find(item => item.id === id);
       if (skill) startPractice(skill);
       else if (id === subject.starterTopic) lesson(subject.id, { practice: true, returnTab: 'practise' });
-      else practiseSession(subject, { text: `I keep getting ${topicById(subject, id)?.name ?? 'this'} wrong. Can we practise it?` });
+      else {
+        const intro = roadmapBands(subject).find(band => band.id === id)?.nodes[0].content;
+        if (intro) lesson(subject.id, { content: intro, practice: true, returnTab: 'practise' });
+        else practiseSession(subject, { text: `I keep getting ${topicById(subject, id)?.name ?? 'this'} wrong. Can we practise it?` });
+      }
     },
   });
   if (physics) {

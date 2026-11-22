@@ -7,7 +7,7 @@ Lumino’s first public prototype is live. The local build uses eight-section st
 ## Current prototype
 
 - Learners choose Linda or Charles, take a short confidence check and get a suggested starting point. The tutors use scripted explanations and hints.
-- Physics has eight playable Motion lessons. Mathematics, Chemistry, Biology and English each have one playable starter lesson. Subject roadmaps preview topics for future lessons.
+- All five subjects have four playable topic introductions. Motion also has eight skills lessons. Mathematics, Chemistry, Biology and English each retain their original starter.
 - Six landscape trails include the Rice Fields bridge build and the canyon relay. Chemistry and Biology offer optional trail activities alongside their starter lessons.
 - Profile shows the learner’s actual XP, streak, completed starters and trophies, with editable name and avatar, subject plans and tutor selection. Settings cover local goals, reminders, lesson help, display preferences and the sample league.
 - The read-only guardian preview uses two sample learners. Guardian invitations, household accounts, enforcement of limits, and sound and music are future work.
@@ -15,11 +15,11 @@ Lumino’s first public prototype is live. The local build uses eight-section st
 
 The Physics and Chemistry gadget-building game, Biology Lab, Math Playground, English spaced practice and live AI tutoring are planned. Accounts, payments and full syllabus coverage are also future work.
 
-## Story lessons · local build, 23 November 2026
+## Original story lesson migration · 23 November 2026
 
-All twelve lessons now use the shared story player. Each has worked and real-world examples, six scored choices, an ungraded explanation with a model answer, and a summary. Typed responses work without speech support. The player retains answers when moving back and returns learners to the same example after an optional trail or workshop. Sandbox is marked “Coming soon”.
+The twelve original skills lessons moved to the shared story player. Each has worked and real-world examples, six scored choices, an ungraded explanation with a model answer, and a summary. Typed responses work without speech support. The player retains answers when moving back and returns learners to the same example after an optional trail or workshop. Sandbox is marked “Coming soon”.
 
-The v4 storage key and lesson IDs carry forward. Historical best scores retain their original denominators, earlier starter misses join the matching curriculum skill, and existing completions keep their XP. The offline cache is `lumino-v59`. Browser walkthroughs completed all twelve lessons, including Biology after an offline reload. Optional activity returns were checked for Cart Workshop, Rice Fields and the canyon relay. All twelve lessons still need educational review. See the [lesson checklist](docs/lesson-migration-plan.md).
+The v4 storage key and lesson IDs carry forward. Historical best scores retain their original denominators, earlier starter misses join the matching curriculum skill, and existing completions keep their XP. That release used offline cache `lumino-v59`. Browser walkthroughs completed all twelve lessons, including Biology after an offline reload. Optional activity returns were checked for Cart Workshop, Rice Fields and the canyon relay. All twelve lessons still need educational review. See the [lesson checklist](docs/lesson-migration-plan.md).
 
 ## Interface update · 22 November 2026
 
@@ -52,7 +52,11 @@ The five handpicked Cambridge IGCSE syllabuses guide what Lumino teaches. The pr
 
 ## Roadmap milestone in the local build
 
-Learn now opens a four-level roadmap for each subject. It offers a next-lesson button, tappable previews and game nodes that open the existing trail explorer. Physics Motion has eight lessons and a separate Cart Workshop. Learners fit tyres, predict where the cart will stop, compare at least two runs and choose an explanation supported by the measurements.
+Learn opens each subject at its current lesson on a downward roadmap. Each of the 20 topics has a four-minute introduction in the story player. Lesson numbers follow topic and group order. The two sides of the winding path alternate, with gold marking the current lesson and mint marking completed lessons. Learners can start any published lesson directly. The confidence check still marks the suggested level.
+
+Cart Workshop and the desert relay follow the average-speed group. The Rocky Mountains swing follows conservation of energy. The Rice Fields, City, Rainforest and Wheat Fields trails follow their subject starters. Each topic ends with a named sandbox or workshop marked “Coming soon”.
+
+The current offline cache is `lumino-v63`. Older v4 saves retain their previous next lesson by ID. Migration adds no completions or rewards. All 20 new introductions await educational review.
 
 - Each run shows approach distance, time, average speed and braking distance. The simplified model holds the cart, track and braking speed constant while learners change the tyres.
 - Practise uses tagged Physics answers to find skills for review and offers fresh questions in the lesson interface. The other subjects offer starter review. Lesson-level saves preserve existing starter completions, XP and streaks.
@@ -69,5 +73,7 @@ Learn now opens a four-level roadmap for each subject. It offers a next-lesson b
 | First Language English | Read short and long stories, discuss texts with AI tutors, and practise gap-fills, sentence writing, rewriting and passage reconstruction through spaced review. Use text evidence in comprehension and analysis answers. |
 
 ## Release checks
+
+The roadmap build passed `npm run check` and `npm test`. A 390 × 844 Chrome walkthrough opened all 20 introductions using the keyboard, launched all seven playable activities, checked the coming-soon feedback and completed the first introduction in each subject. Biology also completed after an offline reload. Returning to Learn centred the next lesson and updated the path colour. Desktop layout was checked at 1280 × 800.
 
 The 23 November chapter-marker and PWA-icon update passed syntax checks and all 15 progress tests. Local browser checks covered desktop and mobile layout, the blended roadmap scenery, chapter-marker contrast and wrapping, route alignment, dock spacing, the simulated iOS safe-area inset, scrollbar behaviour and the white install icons. The service-worker asset list was checked against the repository files. Verify the public prototype after GitHub Pages finishes publishing.

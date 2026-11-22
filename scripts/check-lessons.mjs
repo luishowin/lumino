@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readdir, readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { stories, starters } from '../lumino-app/lessons/index.mjs';
-import { LEVELS, subjectById } from '../lumino-app/curriculum.mjs';
+import { LEVELS, subjectById, topicById } from '../lumino-app/curriculum.mjs';
 import { MOTION_SKILLS } from '../lumino-app/physics-motion.mjs';
 import { trails } from '../adventure/levels.mjs';
 
@@ -19,19 +19,21 @@ export function validateLessons(lessons) {
     const subject = subjectById(l.subject);
     check(subject && stable(l.id) && !lessonIds.has(l.id), 'unknown subject or invalid/duplicate lesson id');
     lessonIds.add(l.id);
-    const skills = new Set(l.subject === 'physics' ? MOTION_SKILLS.map(s => s.id) : [subject.starterTopic]);
+    const intro = l.kind === 'introduction';
+    if (intro) check(topicById(subject, l.topicId) && l.estimatedMinutes >= 3 && l.estimatedMinutes <= 5, 'intro topic and length');
+    const skills = new Set(intro ? [l.topicId] : l.subject === 'physics' ? MOTION_SKILLS.map(s => s.id) : [subject.starterTopic]);
     check(text(l.title) && LEVELS.some(level => level.id === l.level) && Number.isInteger(l.estimatedMinutes) && l.estimatedMinutes > 0, 'metadata');
     check(text(l.intro?.hook) && text(l.intro.tutorLine), 'intro');
     check(range(l.goal, 2, 3) && l.goal.every(text), 'goals');
     check(range(l.definitions, 3, 5) && l.definitions.every(d => text(d.term) && text(d.meaning)), 'definitions');
-    check(range(l.concept, 2, 5) && l.concept.every(c => [c.title,c.body,c.alt,c.tutorLine].every(text) && c.alt !== c.body), 'concept or alternate explanation');
+    check(range(l.concept, intro ? 1 : 2, 5) && l.concept.every(c => [c.title,c.body,c.alt,c.tutorLine].every(text) && c.alt !== c.body), 'concept or alternate explanation');
     check(range(l.examples, 2, 4) && ['problem','real-world'].every(k => l.examples.some(e => e.kind === k)), 'worked and real-world examples');
     for (const e of l.examples) {
       check(text(e.title) && text(e.tutorLine), 'example title or tutor line');
       if (e.kind === 'activity') check(activityIds.has(e.activityId), 'unknown activity');
       else check(['problem','real-world'].includes(e.kind) && range(e.steps, 2, Infinity) && e.steps.every(text), 'example steps');
     }
-    check(range(l.quiz, 7, 10), 'quiz length');
+    check((intro ? range(l.quiz, 4, 4) : range(l.quiz, 7, 10)), 'quiz length');
     const counts = new Map();
     let open = 0;
     for (const q of l.quiz) {

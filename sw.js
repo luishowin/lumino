@@ -1,4 +1,4 @@
-const CACHE = "lumino-v50";
+const CACHE = "lumino-v51";
 const ASSETS = [
   "./", "./index.html", "./lumino-app/", "./lumino-app/index.html", "./learn.html", "./about.html",
   "./styles.css", "./landing.css", "./app.js?v=47", "./manifest.webmanifest", "./assets/lumino-icon-192.png?v=46", "./assets/lumino-icon-512.png", "./assets/lumino-maskable.png",
@@ -21,7 +21,7 @@ const ASSETS = [
   "./assets/ui-icons/avatar-coral.webp", "./assets/ui-icons/avatar-sky.webp",
   "./lumino-app/onboarding.mjs?v=44", "./lumino-app/onboarding.css?v=44",
   "./tutor/assets/linda.webp", "./tutor/assets/charles.webp",
-  "./lumino-app/app.css?v=50", "./lumino-app/content.mjs?v=24", "./lumino-app/curriculum.mjs?v=34",
+  "./lumino-app/app.css?v=51", "./lumino-app/content.mjs?v=24", "./lumino-app/curriculum.mjs?v=34",
   "./lumino-app/pixel-art.mjs?v=31", "./lumino-app/progress.mjs?v=34", "./lumino-app/shortcut.mjs?v=22",
   "./lumino-app/profile.mjs?v=34", "./lumino-app/guardian-preview.mjs?v=31",
   "./lumino-app/roadmap.mjs?v=47", "./lumino-app/physics-motion.mjs?v=34", "./lumino-app/cart-workshop.mjs?v=34",

@@ -20,7 +20,7 @@ The Physics and Chemistry gadget-building game, Biology Lab, Math Playground, En
 - Added pixel-art navigation, subject and reward icons, plus four hoodie avatars. The subject artwork appears in onboarding, Learn and Profile. Trophy tiers and inactive reward states remain visually distinct.
 - Added a progressive blur below scrolling content and kept the dock controls sharp. The active starter lesson keeps the yellow outline, and the learning-plan card uses a muted `#2E4353` outline.
 - Added the Profile and Settings views without a new progress storage key. Existing progress and tutor choices carry over. New artwork and modules are included in the offline cache.
-- Refined the Learn roadmaps: the landscape scenery now reaches the bottom edge behind the dock, a dark scrim keeps map and dock text legible, and the join between the two scene images sits behind the middle topic marker. Removed the seam under the top bar, hid the Learn scrollbar and added about 30px more breathing room beneath the condensed dock controls.
+- Refined the Learn roadmaps: the landscape scenery now reaches the bottom edge behind the dock, a dark scrim keeps map and dock text legible, and the join between the two scene images sits behind the middle topic marker. Removed the seam under the top bar, hid the Learn scrollbar and added about 30px more breathing room beneath the dock on desktop. On touch devices, including iOS, the bottom inset matches the side gutter so the dock does not sit too high above the bottom edge.
 
 ## Curriculum progress
 
@@ -54,4 +54,4 @@ Learn now opens a four-level roadmap for each subject. It offers a next-lesson b
 
 ## Release checks
 
-The 22 November update passed syntax checks and all 15 progress tests. Local browser checks covered desktop and mobile layout, the Learn landscape backdrop and topic-marker alignment, dock spacing, scrollbar behaviour, profile persistence, the guardian preview, reward states and avatar selection. The service-worker asset list was checked against the repository files. Verify the public prototype after GitHub Pages finishes publishing.
+The 22 November update passed syntax checks and all 15 progress tests. Local browser checks covered desktop and mobile layout, the Learn landscape backdrop and topic-marker alignment, dock spacing, the simulated iOS safe-area inset, scrollbar behaviour, profile persistence, the guardian preview, reward states and avatar selection. The service-worker asset list was checked against the repository files. Verify the public prototype after GitHub Pages finishes publishing.

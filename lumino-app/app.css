@@ -167,6 +167,7 @@ p{margin:0}
   --dock-height:calc(var(--dock-row) + var(--dock-top) + var(--dock-bottom));
   position:absolute;inset:0;display:flex;flex-direction:column
 }
+@media (pointer:coarse){.home{--dock-bottom:var(--gutter)}}
 .home.enter{animation:none}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:.65rem;padding:calc(.3rem + var(--safe-top)) calc(var(--gutter) + var(--safe-right)) .3rem calc(var(--gutter) + var(--safe-left))}
 .brand{display:flex;align-items:center;gap:.5rem;min-height:2.75rem;font-family:var(--serif);font-size:1.2rem;color:var(--text);text-decoration:none}

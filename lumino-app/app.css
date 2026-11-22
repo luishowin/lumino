@@ -60,9 +60,9 @@ p{margin:0}
 .splash p{max-width:26rem;text-align:center}
 .splash .btn{text-decoration:none}
 .startup-failed .mark.xl{animation:none}
-.mark{display:grid;place-items:center;background:var(--mint);color:#101B24;font-family:var(--serif);clip-path:polygon(0 0,100% 0,100% 68%,68% 100%,0 100%);line-height:1}
-.mark.xl{width:5.1rem;height:5.1rem;font-size:3.4rem;padding:0 .08em .1em 0;animation:bob 1s steps(2,end) infinite}
-.mark.sm{width:1.7rem;height:1.7rem;font-size:1.15rem;padding:0 .08em .1em 0}
+.mark{display:block}
+.mark.xl{width:5.1rem;height:5.1rem;animation:bob 1s steps(2,end) infinite}
+.mark.sm{width:1.7rem;height:1.7rem;}
 .wordmark{font-family:var(--serif);font-size:1.9rem}
 @keyframes bob{50%{transform:translateY(-4px)}}
 .bob{animation:bob 1s steps(2,end) infinite}
@@ -215,8 +215,6 @@ p{margin:0}
 .hello{display:flex;align-items:flex-end;gap:1rem;margin-bottom:1.25rem}
 .subj-tabs{display:flex;gap:.45rem;overflow-x:auto;padding-bottom:.45rem;margin-bottom:.85rem}
 .subj-tabs .chip{flex:none}
-.maphead{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:.25rem .85rem;margin-bottom:.65rem}
-.maphead h2{font-size:1.7rem}
 .section-title{font-size:1.375rem;margin-bottom:.65rem}
 .btn.danger{--edge:var(--coral);--fill:var(--surface2);color:var(--coral)}
 .empty{background:var(--surface);padding:1.05rem;clip-path:var(--snip);display:grid;gap:.85rem}
@@ -527,34 +525,20 @@ body:has(.home) .storage-notice { bottom: calc(4.5rem + var(--safe-bottom)); }
 }
 
 /* Learn roadmap */
-.has-roadmap .body{scroll-padding-block-start:8rem;scroll-padding-block-end:calc(var(--dock-height) + 4.5rem);padding-bottom:calc(var(--dock-height) + 4.6rem)}
+.has-roadmap .body{scroll-padding-block-start:5rem;scroll-padding-block-end:calc(var(--dock-height) + 4.5rem);padding-bottom:calc(var(--dock-height) + 4.6rem)}
 .roadmap-controls{position:sticky;top:-1.05rem;z-index:1;padding:.7rem 0 .55rem;background:var(--bg);box-shadow:0 10px 18px rgb(10 20 28 / 75%)}
-.roadmap-controls .subj-tabs{margin-bottom:.15rem}
-.roadmap-controls .maphead{margin-bottom:0}
-.roadmap-context{display:none}
-.placement-note{display:flex;align-items:center;justify-content:space-between;gap:.65rem;font-size:.835rem;color:var(--muted);padding-bottom:.3rem}
-.placement-note .textbtn{flex:none}
+.roadmap-controls .subj-tabs{margin:0;padding:0}
 .roadmap{position:relative;isolation:isolate;overflow:hidden;border:1px solid var(--line);border-radius:1rem;background:var(--surface)}
 @media (max-width:64rem), (max-width:90rem) and (pointer:coarse){
   .has-roadmap .body{padding-inline:0;scrollbar-width:none}
   .has-roadmap .home-content{max-width:none}
   .has-roadmap .roadmap{border:0;border-radius:0}
-  .has-roadmap .roadmap-controls,.has-roadmap .shortcut-offer{
+  .has-roadmap .shortcut-offer{
     margin-inline:calc(var(--gutter) + var(--safe-left)) calc(var(--gutter) + var(--safe-right))
   }
-}
-@media (max-width:48rem){
-  .has-roadmap .body{scroll-padding-block-start:5rem}
-  .has-roadmap .roadmap-controls{margin-inline:0;
-    padding:.55rem calc(var(--gutter) + var(--safe-right)) .5rem calc(var(--gutter) + var(--safe-left));
-    box-shadow:none;background:linear-gradient(to bottom,var(--bg) 70%,rgb(10 20 28 / 88%))}
-  .roadmap-controls .subj-tabs{margin-bottom:0;padding-bottom:.25rem}
-  .roadmap-controls .maphead h2{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-  .roadmap-controls :is([data-edit],.placement-note){display:none}
-  .roadmap-context{display:flex;align-items:baseline;gap:.35rem;
-    color:var(--muted);font-size:.75rem;line-height:1.35;white-space:nowrap}
-  .roadmap-context [aria-hidden]{flex:none}
-  .roadmap-context span:not([aria-hidden]){min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .has-roadmap .roadmap-controls{
+    padding-inline:calc(var(--gutter) + var(--safe-left)) calc(var(--gutter) + var(--safe-right))
+  }
 }
 .roadmap-bands,.map-nodes{display:flex;flex-direction:column-reverse}
 .map-band{position:relative;min-height:22rem;--map-gutter:clamp(.65rem,4vw,3.5rem);--biome:#263b47;

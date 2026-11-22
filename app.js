@@ -8,7 +8,7 @@ import { boostRemaining, clearProgress, completeLesson, currentStreak, freshProg
 import { canReadAloud, displayName, escapeHTML, mountProfile } from './lumino-app/profile.mjs?v=34';
 import { bindWorkshop, workshopMarkup } from './lumino-app/cart-workshop.mjs?v=34';
 import { drawDistanceGraph, getPracticeSession, MOTION_LESSONS, MOTION_SKILLS, motionSkillFor } from './lumino-app/physics-motion.mjs?v=34';
-import { CART_ID, drawRoadmap, mapMarkup, mapPlacementNote, roadmapBands } from './lumino-app/roadmap.mjs?v=39';
+import { CART_ID, drawRoadmap, mapMarkup, roadmapBands } from './lumino-app/roadmap.mjs?v=39';
 
 const stage = document.querySelector('#stage');
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -730,7 +730,7 @@ function bindLearningReminder(body) {
     <p><b>${tutor().name}’s reminder</b> Set aside ${goal} minutes for today’s practice.</p>
     <button type="button" class="textbtn" aria-label="Dismiss today’s reminder">Dismiss</button>
   </aside>`);
-  body.querySelector('.roadmap-controls').append(notice);
+  body.querySelector('.roadmap-controls').after(notice);
 
   function refresh() {
     const now = new Date();
@@ -752,7 +752,7 @@ function bindLearningReminder(body) {
 function home(tab) {
   const [, label, icon = tab] = sections.find(([id]) => id === tab);
   const node = mount(`<div class="home${tab === 'learn' ? ' has-roadmap' : ''}">
-    <header class="topbar"><a class="brand" href="../"><span class="mark sm" aria-hidden="true">L</span>Lumino</a>
+    <header class="topbar"><a class="brand" href="../"><img class="mark sm" src="../assets/lumino-icon-192.png?v=46" alt="">Lumino</a>
       <div class="stats" aria-label="Your stats">
         <button class="stat stat-link" type="button" data-open-streak title="Open your streak in Ranks">${spr('flame', 2)}${currentStreak(state)}<span class="sr"> day streak</span></button>
         <span class="stat" title="Streak recharges">${spr('bolt', 2)}${state.recharges}<span class="sr"> streak recharges</span></span>
@@ -920,27 +920,11 @@ function learnTab(body) {
   const plan = state.plans[subject.id];
   const placement = plan?.levels[plan.topicId];
   const upcoming = nextLesson(subject);
-  const learnerLevel = LEVELS.find(level => level.id === placement)?.name ?? 'Level not set';
   const motionSubtopic = subject.id === 'physics' ? (motionSkillFor(upcoming?.id) ?? MOTION_SKILLS[1]).title : undefined;
   const bands = roadmapBands(subject, motionSubtopic);
-  const { topic, subtopic } = bands[0];
-  const placementNote = mapPlacementNote(placement);
-  body.innerHTML = `<div class="roadmap-controls">${subjectTabs(subject)}
-    <p class="roadmap-context"><span title="${escapeHTML(learnerLevel)}">${learnerLevel}</span><span aria-hidden="true">·</span>
-      <span title="${escapeHTML(topic)}">${topic}</span><span aria-hidden="true">·</span>
-      <span title="${escapeHTML(subtopic)}">${subtopic}</span></p>
-    <div class="maphead"><h2>${subject.name}</h2><button type="button" class="textbtn" data-edit>${plan ? 'Edit learning plan' : 'Choose your level'}</button></div>
-    ${placementNote ? `<div class="placement-note"><p>${placementNote}</p><button type="button" class="textbtn" data-jump-level>Show my level</button></div>` : ''}</div>
+  body.innerHTML = `<div class="roadmap-controls">${subjectTabs(subject)}</div>
     ${mapMarkup(subject, bands, { placement, finished: !upcoming, gameResults: state.gameResults })}`;
   bindSubjects(body, 'learn');
-  click(body, '[data-edit]', () => chooseTopic(subject, 'learn'));
-  if (placementNote) {
-    click(body, '[data-jump-level]', () => {
-      const band = body.querySelector('.placement-chip').closest('.map-band');
-      band.scrollIntoView({ block: 'start' });
-      focusHeading(band);
-    });
-  }
   const nodes = bands.flatMap(band => band.nodes);
   for (const button of body.querySelectorAll('[data-map-node]')) {
     const item = nodes.find(node => node.id === button.dataset.mapNode);

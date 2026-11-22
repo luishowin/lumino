@@ -10,15 +10,15 @@
 <meta property="og:url" content="https://luishowin.github.io/lumino/">
 <meta property="og:title" content="About Lumino">
 <meta property="og:description" content="Explore five subjects and play six landscape trails in Lumino, a learning adventure built around putting ideas to work.">
-<meta property="og:image" content="https://luishowin.github.io/lumino/assets/lumino-preview.png">
+<meta property="og:image" content="https://luishowin.github.io/lumino/assets/lumino-preview.png?v=46">
 <meta property="og:image:width" content="928">
 <meta property="og:image:height" content="414">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="About Lumino">
 <meta name="twitter:description" content="Explore five subjects and play six landscape trails in Lumino, a learning adventure built around putting ideas to work.">
-<meta name="twitter:image" content="https://luishowin.github.io/lumino/assets/lumino-preview.png">
-<link rel="icon" href="assets/lumino-favicon.png" type="image/png">
-<link rel="apple-touch-icon" href="assets/lumino-favicon.png">
+<meta name="twitter:image" content="https://luishowin.github.io/lumino/assets/lumino-preview.png?v=46">
+<link rel="icon" href="assets/lumino-favicon.png?v=46" type="image/png">
+<link rel="apple-touch-icon" href="assets/lumino-maskable.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hedvig+Letters+Serif&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -72,15 +72,7 @@
     display: inline-flex; align-items: center; gap: .75rem;
     text-decoration: none; color: var(--charcoal);
   }
-  .brand-mark {
-    display: grid; place-items: center;
-    width: 2.5rem; height: 2.5rem;
-    background: var(--mint); color: var(--ink-navy);
-    /* square with the bottom-right corner snipped */
-    clip-path: polygon(0 0, 100% 0, 100% 68%, 68% 100%, 0 100%);
-    font-family: var(--serif); font-size: 1.65rem; line-height: 1;
-    padding: 0 .1em .12em 0;
-  }
+  .brand-mark { width: 2.5rem; height: 2.5rem; }
   .brand-name {
     font-family: var(--serif); font-size: 1.4rem; letter-spacing: .01em;
   }
@@ -253,7 +245,7 @@
 <div class="wrap">
   <header class="site-header reveal" style="--i:0">
     <a class="brand" href="./" aria-label="Lumino home">
-      <span class="brand-mark" aria-hidden="true">L</span>
+      <img class="brand-mark" src="assets/lumino-icon-192.png?v=46" alt="">
       <span class="brand-name">Lumino</span>
     </a>
     <a class="pill" href="lumino-app/">Try Lumino</a>

@@ -6,31 +6,31 @@ export const CART_ID = 'cart-workshop';
 
 const routes = {
   math: {
-    bands: ['wheat', 'rice', 'mountains', 'city'],
+    scenes: ['terraced-valley', 'sunset-valley'],
     topics: ['simple-equations', 'fractions', 'patterns-and-rules', 'quadratics'],
     previews: ['Parts of a whole', 'Finding the nth term', 'Solving real-world quadratics'],
     games: [['trail-rice', 'Rice Fields crossing'], ['fraction-workshop', 'Fraction workshop'], ['math-playground', 'Math Playground'], ['quadratic-lab', 'Quadratic lab']],
   },
   physics: {
-    bands: ['city', 'rice', 'mountains', 'desert'],
+    scenes: ['jungle-canyon', 'mountain-forest'],
     topics: ['speed-and-velocity', 'simple-circuits', 'conservation-of-energy', 'momentum'],
     previews: ['Circuit symbols and components', 'Energy stores and transfers', 'Momentum in collisions'],
     games: [[CART_ID, 'Cart Workshop'], ['circuit-workshop', 'Circuit workshop'], ['energy-workshop', 'Energy workshop'], ['momentum-lab', 'Momentum lab']],
   },
   chemistry: {
-    bands: ['city', 'desert', 'rice', 'mountains'],
+    scenes: ['temple-ruins', 'jungle-canyon'],
     topics: ['physical-and-chemical-change', 'the-periodic-table', 'acids-and-bases', 'rates-of-reaction'],
     previews: ['Groups and periods', 'Neutralisation', 'Interpreting rate graphs'],
     games: [['trail-city', 'City trail'], ['elements-workshop', 'Elements workshop'], ['reaction-workshop', 'Reaction workshop'], ['rates-lab', 'Rates lab']],
   },
   biology: {
-    bands: ['wheat', 'rice', 'rainforest', 'mountains'],
+    scenes: ['mountain-forest', 'terraced-valley'],
     topics: ['photosynthesis', 'cell-structure', 'digestion', 'dna-and-inheritance'],
     previews: ['Plant and animal cells', 'Enzymes and absorption', 'Genetic crosses and pedigrees'],
     games: [['trail-rainforest', 'Rainforest trail'], ['cell-workshop', 'Cell workshop'], ['digestion-lab', 'Digestion lab'], ['inheritance-lab', 'Inheritance lab']],
   },
   english: {
-    bands: ['city', 'wheat', 'rice', 'mountains'],
+    scenes: ['sunset-temple', 'temple-ruins'],
     topics: ['paragraph-structure', 'making-inferences', 'persuasive-writing', 'analysing-an-authors-choices'],
     previews: ['Reading for clues', 'Supporting a viewpoint', 'Language and its effects'],
     games: [['trail-wheat', 'Wheat Fields trail'], ['clue-workshop', 'Clue workshop'], ['editor-workshop', 'Editor’s workshop'], ['writer-workshop', 'Writer’s workshop']],
@@ -50,7 +50,7 @@ export function roadmapBands(subject, starterSubtopic = LESSONS[subject.id].titl
     const title = index === 0 ? starterTitles[subject.id] : topic.name;
     const [gameId, gameTitle] = route.games[index];
     return {
-      level: level.name, index, art: route.bands[index],
+      level: level.name, index,
       topic: title.split(':', 1)[0], subtopic: index === 0 ? starterSubtopic : route.previews[index - 1],
       nodes: [
         { id: topic.id, title,
@@ -68,9 +68,10 @@ export function mapMarkup(subject, bands, { placement, finished, gameResults }) 
   const marker = placementIndex(placement);
   return `<div class="roadmap" aria-label="${subject.name} roadmap">
     <svg class="roadmap-route" aria-hidden="true"><path vector-effect="non-scaling-stroke"/></svg>
+    <div class="map-scenery" aria-hidden="true">${routes[subject.id].scenes.map((scene, index) =>
+      `<img src="../assets/roadmaps/${scene}.webp" alt="" loading="${index === 0 ? 'eager' : 'lazy'}" decoding="async">`).join('')}</div>
     <div class="roadmap-bands">${bands.map(band => `
       <section class="map-band map-band-${band.index}" aria-label="${band.level}">
-        <img class="map-art" src="../assets/landscapes/${band.art}.webp" alt="" loading="${band.index === 0 ? 'eager' : 'lazy'}" decoding="async">
         <header class="map-band-heading">
           <h3>${band.topic}</h3>
           <p><span>${band.subtopic}</span> ${marker === band.index ? '<span class="placement-chip">Your level</span>' : ''}</p>

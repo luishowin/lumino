@@ -8,7 +8,7 @@ import { boostRemaining, clearProgress, completeLesson, currentStreak, freshProg
 import { canReadAloud, displayName, escapeHTML, mountProfile } from './lumino-app/profile.mjs?v=34';
 import { bindWorkshop, workshopMarkup } from './lumino-app/cart-workshop.mjs?v=34';
 import { drawDistanceGraph, getPracticeSession, MOTION_LESSONS, MOTION_SKILLS, motionSkillFor } from './lumino-app/physics-motion.mjs?v=34';
-import { CART_ID, drawRoadmap, mapMarkup, roadmapBands } from './lumino-app/roadmap.mjs?v=39';
+import { CART_ID, drawRoadmap, mapMarkup, roadmapBands } from './lumino-app/roadmap.mjs?v=47';
 
 const stage = document.querySelector('#stage');
 const motion = matchMedia('(prefers-reduced-motion: reduce)');

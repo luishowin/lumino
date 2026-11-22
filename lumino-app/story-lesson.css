@@ -1,0 +1,19 @@
+.screen.lesson-story { --column: 36rem; gap: .65rem; padding-bottom: calc(.7rem + var(--safe-bottom)); }
+.lesson-story .bars { display: flex; width: 100%; }
+.lesson-story .story-page { flex: 1 1 auto; min-height: 8rem; overflow-y: auto; display: block; padding: clamp(1rem, 4vw, 1.6rem); }
+.story-page > * + * { margin-top: 1rem; }
+.story-page :is(ol,ul) { padding-left: 1.5rem; }
+.story-page li + li, .story-page dt:not(:first-child) { margin-top: .65rem; }
+.story-page dt { font-weight: 700; color: var(--mint); }
+.story-page dd { margin-left: 0; }
+.story-page .choice { text-align: left; }
+.story-page textarea { width: 100%; min-height: 6rem; display: block; margin-block: .5rem; padding: .7rem; background: var(--bg); color: var(--text); border: 2px solid var(--line); font: inherit; }
+.story-nav { display: flex; gap: .6rem; }
+.story-nav button { flex: 1; }
+.story-nav [aria-disabled=true] { --fill: var(--surface2); --edge: var(--line); color: var(--text); }
+.story-status { font-size: .85rem; }
+.story-status:empty { position: absolute; }
+.lesson-story .tutor-dialogue { --portrait-width: clamp(4rem, 16vw, 5.5rem); }
+.lesson-story .tutor-dialogue-copy { padding: .75rem; }
+.lesson-story .story-feedback { border-left: 3px solid var(--mint); padding-left: .8rem; }
+.lesson-story :focus-visible { outline: 2px solid var(--banana); outline-offset: 2px; }

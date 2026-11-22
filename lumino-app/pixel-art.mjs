@@ -3,13 +3,13 @@ var IC={'.':null,m:'#6AF4BF',w:'#EAF4EE',g:'#6AF4BF',y:'#FFE135',r:'#FF7A5C',k:'
 var SP={
  charles:{pal:P,rows:['...hhhhhh...','..hhhhhhhh..','..hssssssh..','..sggssggs..','..ssssssss..','..sbbbbbbs..','...bbbbbb...','....bbbb....','..oooooooo..','.soodooodos.','.soooooooos.','.soodooodos.','..oooooooo..','..pppppppp..','..ppp..ppp..','..kkk..kkk..']},
  linda:{pal:P,rows:['...hhhhhh...','..hhhhhhhh..','.hhsssssshh.','.hhsessesshh','.hhssssssshh','.hhsssrrsshh','.hhh.ss.hhh.','..tttttttt..','.stttddtttts.','.stttttttts.','.stttttttts.','..tttttttt..','..pppppppp..','..ppp..ppp..','..ppp..ppp..','..kkk..kkk..']},
- hero:{pal:P,rows:['..hhhhhh..','.hhhhhhhh.','.hssssssh.','.hsessesh.','.hssssssh.','..mmmmmm..','.smmmmmms.','.smyyyyms.','.smmmmmms.','..pppppp..','..pp..pp..','..kk..kk..']},
+ hero:{pal:P,tones:{banana:{m:'#FFE135',y:'#C9AC00'},coral:{m:'#FF7A5C',y:'#C94A30'},sky:{m:'#8BD3FF',y:'#4A9ED4'}},rows:['..hhhhhh..','.hhhhhhhh.','.hssssssh.','.hsessesh.','.hssssssh.','..mmmmmm..','.smmmmmms.','.smyyyyms.','.smmmmmms.','..pppppp..','..pp..pp..','..kk..kk..']},
+ shield:{pal:IC,rows:['mmmmmmmm','mmmmmmmm','mmmwwmmm','mmmwwmmm','mmwwwwmm','.mmwwmm.','..mmmm..','...mm...']},
  lantern:{pal:IC,rows:['..kk..','.kkkk.','kyyyyk','kyYYyk','kyyyyk','kyYYyk','kyyyyk','.kkkk.','..kk..']},
- flame:{pal:IC,tones:{off:{r:'#2A4152',y:'#3A566A'}},rows:['...r....','..rr.r..','..rrrr..','.rryyrr.','.rryyyr.','.rryyyr.','.rrryrr.','..rrrr..']},
- bolt:{pal:IC,tones:{off:{y:'#3A566A'}},rows:['....yy..','...yy...','..yy....','.yyyyyy.','...yy...','..yy....','.yy.....','yy......']},
- star:{pal:IC,tones:{off:{y:'#2A4152'}},rows:['...yy...','...yy...','yyyyyyyy','.yyyyyy.','..yyyy..','.yyyyyy.','.yy..yy.','yy....yy']},
- trophy:{pal:{'.':null,y:'#FFD25E',Y:'#C9962B'},tones:{bronze:{y:'#CD7F32',Y:'#8A5A2B'},silver:{y:'#C9D3DA',Y:'#8A97A1'},gold:{y:'#FFD25E',Y:'#C9962B'},diamond:{y:'#8BD3FF',Y:'#4A9ED4'},off:{y:'#2A4152',Y:'#1E3140'}},
-  rows:['.yyyyyyyy.','yyyyyyyyyy','y.yyyyyy.y','y.yyyyyy.y','.yyyyyyyy.','..yyyyyy..','...yyyy...','....yy....','...YYYY...','..YYYYYY..']},
+ flame:{artSize:8},
+ bolt:{artSize:8},
+ star:{artSize:8},
+ trophy:{artSize:10},
  'ic-math':{pal:IC,rows:['...mm...','...mm...','...mm...','mmmmmmmm','mmmmmmmm','...mm...','...mm...','...mm...']},
  'ic-chem':{pal:IC,rows:['..wwww..','...ww...','...ww...','..gggg..','.gggggg.','gggggggg','gggggggg','.wwwwww.']},
  'ic-bio':{pal:IC,rows:['......gg','....gggg','..gggggg','.ggggggg','.gggggg.','gggggg..','gg.gg...','g.......']},
@@ -23,6 +23,21 @@ function drawSprite(rows,pal,scale){
   rows.forEach(function(r,y){for(var i=0;i<r.length;i++){var col=pal[r[i]];if(col){x.fillStyle=col;x.fillRect(i,y,1,1)}}});
   return c;
 }
+
+function iconURL(name) {
+  return new URL(`../assets/ui-icons/${name}.webp`, import.meta.url);
+}
+
+function artSprite(name, size) {
+  const image = document.createElement('img');
+  image.className = 'sprite-art';
+  image.width = size;
+  image.height = size;
+  image.alt = '';
+  image.src = iconURL(name);
+  return image;
+}
+
 export function hydrate(root){
   root.querySelectorAll('[data-sprite]:not([data-done])').forEach(function(n){
     var name=n.dataset.sprite,sc=+n.dataset.scale||4,tone=n.dataset.tone,sp=SP[name];
@@ -35,11 +50,15 @@ export function hydrate(root){
       return;
     }
     var pal=tone&&sp.tones&&sp.tones[tone]?Object.assign({},sp.pal,sp.tones[tone]):sp.pal;
-    var node=drawSprite(sp.rows,pal,sc);
+    var node=sp.artSize ? artSprite(name, sp.artSize * sc) : drawSprite(sp.rows,pal,sc);
     n.replaceChildren(node);n.dataset.done='1';n.setAttribute('aria-hidden','true');
   });
 }
 export function spr(name,scale,tone,cls){return '<span class="sprite '+(cls||'')+'" data-sprite="'+name+'" data-scale="'+scale+'"'+(tone?' data-tone="'+tone+'"':'')+'></span>'}
+
+export function uiIcon(id) {
+  return `<img class="ui-icon" src="${iconURL(id)}" alt="">`;
+}
 
 export function drawSky(){
   var c=document.getElementById('sky'),W=320,H=180;c.width=W;c.height=H;

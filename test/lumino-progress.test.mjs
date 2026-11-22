@@ -115,6 +115,28 @@ test('each topic keeps its own playable level choice', () => {
   });
 });
 
+test('profile preferences survive reload alongside existing progress', () => {
+  const storage = storageWith({ [PROGRESS_KEY]: { xp: 50, onboarded: true, tutor: 'linda' } });
+  const state = loadProgress(storage);
+  assert.deepEqual(state.profile, freshProgress().profile);
+  const profile = {
+    name: 'Baraka', avatar: 'sky', since: 20100, goal: 15, remind: true, reminderTime: '08:45',
+    hints: true, read: true, largeText: true, reduceMotion: true, league: false,
+  };
+  state.profile = profile;
+  assert.equal(saveProgress(storage, state), true);
+  assert.deepEqual(loadProgress(storage), state);
+  assert.equal(loadProgress(storage).xp, 50);
+});
+
+test('malformed profile data keeps safe defaults without losing XP', () => {
+  const storage = storageWith({ [PROGRESS_KEY]: {
+    xp: 120, profile: { name: 7, avatar: 'bad', since: 100_000_001, goal: 42, remind: 'true', reminderTime: '25:99' },
+  } });
+  assert.deepEqual(loadProgress(storage).profile, freshProgress().profile);
+  assert.equal(loadProgress(storage).xp, 120);
+});
+
 test('reset clears the current and all earlier save formats', () => {
   const storage = storageWith({ 'lumino.app.v3': {}, 'lumino.app.v2': {}, 'lumino-v2': {} });
   assert.equal(saveProgress(storage, freshProgress()), true);

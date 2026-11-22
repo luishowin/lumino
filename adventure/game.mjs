@@ -56,7 +56,9 @@ export function adventureMarkup(trailId, backLabel = 'Back to map') {
   </section>`;
 }
 
-export function mountAdventure(root, firstId, { onBack, onWorkshop }) {
+export function mountAdventure(root, firstId, {
+  onBack, onWorkshop, reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+}) {
   const select = selector => root.querySelector(selector);
   const stage = select('.adventure-stage');
   const canvas = select('canvas');
@@ -70,7 +72,6 @@ export function mountAdventure(root, firstId, { onBack, onWorkshop }) {
   const listeners = new AbortController();
   const pressed = new Map();
   const effects = [];
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   let trail, backdrop, terrain, player, checkpoint, room;
   let frameId, previous, accumulator = 0;

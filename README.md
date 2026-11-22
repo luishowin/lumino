@@ -14,6 +14,8 @@ That practice also builds judgment for working with AI. Learners should be able 
 
 The prototype pairs learners with Linda or Charles and lets them choose a starting level for each topic. A short, optional confidence check can suggest a level. Mathematics, physics, chemistry, biology, and English each offer one Learn, Apply, and Recall starter. Topics preview learning goals for future lessons, with Senior (AS & A Level) planned. XP and streaks are saved on this device, and Ranks compares local XP with sample scores.
 
+The **You** tab shows your learning summary, selected subjects and tutor. You can edit your display name, choose from four pixel-art avatars, and manage your daily goal, reminders, lesson hints, read-aloud, text size, motion and sample-league visibility. These settings stay in the current browser. Reminders appear in Learn while Lumino is open, and read-aloud uses the browser’s speech support. The guardian preview walks through a demo PIN and a read-only dashboard using sample learner data.
+
 ## Run locally
 
 Run `npm run check` and `npm test`, then `npm start` and open `http://localhost:4173`. The GitHub Pages entry point is a public introduction, and the interactive learning prototype is available at `lumino-app/`. The app uses browser-local storage and can work offline after its first successful load.
@@ -25,5 +27,7 @@ The activities are early prototypes and need educational review. Accounts, payme
 ## Assets and contributions
 
 The canonical Linda and Charles portraits are in `assets/`. The `*-poses.webp` dialogue sheets in `tutor/assets/` have four square cells. The top row is greeting and explaining. The bottom row is thinking and encouraging. Only add assets with verified rights for public distribution. Do not commit secrets, learner data, internal documents, or unlicensed artwork. Learning content should include an objective, an application challenge, and a retrieval check.
+
+Navigation, subject, reward and avatar artwork is in `assets/ui-icons/`. When adding or replacing UI assets, keep the application’s asset URLs and the offline cache in `sw.js` in sync.
 
 Released under the [MIT License](LICENSE).

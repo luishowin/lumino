@@ -1,15 +1,15 @@
-import { adventureMarkup, mountAdventure } from './adventure/game.mjs';
+import { adventureMarkup, mountAdventure } from './adventure/game.mjs?v=30';
 import { landscape, trails } from './adventure/levels.mjs';
 import { LESSONS, RIVALS, TRAIL_LESSONS, TROPHIES, TUTORS, TUTOR_HELP } from './lumino-app/content.mjs?v=24';
 import { LEVELS, SUBJECTS, subjectById, topicById } from './lumino-app/curriculum.mjs?v=24';
-import { drawSky, hydrate, spr } from './lumino-app/pixel-art.mjs?v=24';
-import { clearProgress, completeLesson, currentStreak, freshProgress, loadProgress, localDay, saveProgress } from './lumino-app/progress.mjs?v=24';
+import { drawSky, hydrate, spr, uiIcon } from './lumino-app/pixel-art.mjs?v=31';
+import { clearProgress, completeLesson, currentStreak, freshProgress, loadProgress, localDay, saveProgress } from './lumino-app/progress.mjs?v=30';
+import { canReadAloud, displayName, escapeHTML, mountProfile } from './lumino-app/profile.mjs?v=33';
 
 const stage = document.querySelector('#stage');
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const sections = [
-  ['learn', 'Learn', 'star', ''], ['ranks', 'Ranks', 'trophy', 'bronze'],
-  ['streak', 'Streak', 'flame', ''], ['you', 'You', 'hero', ''],
+  ['learn', 'Learn'], ['ranks', 'Ranks', 'trophy'], ['streak', 'Streak'], ['you', 'You'],
 ];
 
 let storage;
@@ -17,8 +17,16 @@ try { storage = window.localStorage; } catch {}
 let state = loadProgress(storage);
 let dispose;
 let shortcut;
+let dismissedReminderDay;
 
 const tutor = () => TUTORS.find(item => item.id === state.tutor) || TUTORS[1];
+
+function applyPreferences() {
+  document.documentElement.classList.toggle('large-text', state.profile.largeText);
+  document.documentElement.classList.toggle('reduce-motion', state.profile.reduceMotion);
+}
+
+const reduceMotion = () => motion.matches || state.profile.reduceMotion;
 
 function element(html) {
   const template = document.createElement('template');
@@ -111,7 +119,7 @@ function story(slides, { label, onDone, start = 0, skipLabel = 'Skip story', dia
   let lastTime;
   let animation;
   let dead = false;
-  let reduced = motion.matches;
+  let reduced = reduceMotion();
 
   function paint() {
     fills.forEach((bar, i) => {
@@ -146,8 +154,8 @@ function story(slides, { label, onDone, start = 0, skipLabel = 'Skip story', dia
   function tick(time) {
     const delta = lastTime === undefined ? 0 : Math.min(100, time - lastTime);
     lastTime = time;
-    if (reduced !== motion.matches) {
-      reduced = motion.matches;
+    if (reduced !== reduceMotion()) {
+      reduced = reduceMotion();
       paint();
     }
     if (!reduced && !paused && pointer === null && !document.hidden && !footer.querySelector(':focus-visible:not([data-pause])')) {
@@ -315,19 +323,19 @@ function meetTutor() {
 function chooseSubject() {
   const node = screen('What would you like to learn first?',
     `<div class="choices" role="group" aria-label="Subject">${SUBJECTS.map(subject =>
-      `<button type="button" class="pick" data-subject="${subject.id}">${spr(subject.icon, 3)}<b>${subject.name}</b></button>`).join('')}</div>
+      `<button type="button" class="pick" data-subject="${subject.id}">${uiIcon(subject.id)}<b>${subject.name}</b></button>`).join('')}</div>
     <div class="onboarding-cast">${spr(tutor().id, 5, '', 'bob')}</div>`,
     { back: chooseTutor, backLabel: 'Change tutor' });
   for (const button of node.querySelectorAll('[data-subject]')) {
     button.addEventListener('click', () => {
       state.subject = button.dataset.subject;
       persist();
-      chooseTopic(subjectById(state.subject), false);
+      chooseTopic(subjectById(state.subject));
     });
   }
 }
 
-function chooseTopic(subject, fromHome, focusedTopic) {
+function chooseTopic(subject, returnTab, focusedTopic) {
   const plan = state.plans[subject.id];
   const openTopic = focusedTopic ?? plan?.topicId ?? subject.starterTopic;
   const node = screen('Choose your topic', `<p class="muted">${subject.name}</p>
@@ -343,9 +351,10 @@ function chooseTopic(subject, fromHome, focusedTopic) {
         }).join('')}</div>
       </details>`;
     }).join('')}</div>`,
-  { back: fromHome ? () => home('learn') : chooseSubject, backLabel: fromHome ? 'Back to Learn' : 'Change subject' });
+  { back: returnTab ? () => home(returnTab) : chooseSubject,
+    backLabel: returnTab === 'you' ? 'Back to You' : returnTab ? 'Back to Learn' : 'Change subject' });
   for (const button of node.querySelectorAll('[data-topic]')) {
-    button.addEventListener('click', () => chooseLevel(subject, topicById(subject, button.dataset.topic), fromHome));
+    button.addEventListener('click', () => chooseLevel(subject, topicById(subject, button.dataset.topic), returnTab));
   }
 }
 
@@ -353,7 +362,7 @@ function starterAvailable(subject, topic, level) {
   return subject.starterTopic === topic.id && level.id === 'beginner';
 }
 
-function chooseLevel(subject, topic, fromHome, recommendation) {
+function chooseLevel(subject, topic, returnTab, recommendation) {
   const saved = state.plans[subject.id]?.levels[topic.id];
   const node = screen('Choose your starting level', `<div class="level-context">
     <p class="muted">${subject.name} · ${topic.name}</p>
@@ -371,15 +380,15 @@ function chooseLevel(subject, topic, fromHome, recommendation) {
     }).join('')}
       <div class="level-preview"><span><b>Senior</b><small>AS &amp; A Level · Coming later</small></span></div>
     </div>`,
-  { back: () => chooseTopic(subject, fromHome, topic.id), backLabel: 'Change topic' });
+  { back: () => chooseTopic(subject, returnTab, topic.id), backLabel: 'Change topic' });
   for (const button of node.querySelectorAll('[data-level]')) {
     const level = LEVELS.find(item => item.id === button.dataset.level);
-    button.addEventListener('click', () => reviewPlan(subject, topic, level, fromHome, recommendation));
+    button.addEventListener('click', () => reviewPlan(subject, topic, level, returnTab, recommendation));
   }
-  click(node, '[data-help-level]', () => confidenceCheck(subject, topic, fromHome));
+  click(node, '[data-help-level]', () => confidenceCheck(subject, topic, returnTab));
 }
 
-function confidenceCheck(subject, topic, fromHome) {
+function confidenceCheck(subject, topic, returnTab) {
   let index = 0;
   let recommendation;
   const node = screen('Help me choose', `<div data-dots></div>
@@ -390,7 +399,7 @@ function confidenceCheck(subject, topic, fromHome) {
       <button type="button" class="ans maybe" data-confidence="maybe">Maybe</button>
       <button type="button" class="ans" data-confidence="not-yet">Not yet</button>
     </div>`, {
-    back: () => chooseLevel(subject, topic, fromHome),
+    back: () => chooseLevel(subject, topic, returnTab),
     backLabel: 'Back to levels',
     side: '<span class="muted" data-count></span>',
   });
@@ -405,7 +414,7 @@ function confidenceCheck(subject, topic, fromHome) {
       if (button.dataset.confidence !== 'yes') recommendation ??= LEVELS[index].id;
       index++;
       if (index === LEVELS.length) {
-        chooseLevel(subject, topic, fromHome, recommendation ?? 'advanced');
+        chooseLevel(subject, topic, returnTab, recommendation ?? 'advanced');
       } else {
         draw();
       }
@@ -420,7 +429,7 @@ function confidenceCheck(subject, topic, fromHome) {
 
 function topicPlanCard(subject, topic, level, offerLesson = false) {
   const ready = level && starterAvailable(subject, topic, level);
-  return `<article class="card cur topic-plan">
+  return `<article class="card topic-plan">
     <span class="tag-label">${level?.name ?? 'Starting level to choose'}</span>
     <h3>${topic.name}</h3>
     ${level ? `<p>${topic.goals[level.id]}</p>
@@ -429,11 +438,11 @@ function topicPlanCard(subject, topic, level, offerLesson = false) {
   </article>`;
 }
 
-function reviewPlan(subject, topic, level, fromHome, recommendation) {
+function reviewPlan(subject, topic, level, returnTab, recommendation) {
   const node = screen('Your learning plan', `
     ${topicPlanCard(subject, topic, level)}
     <button type="button" class="btn block" data-continue>Confirm my plan</button>`, {
-    back: () => chooseLevel(subject, topic, fromHome, recommendation),
+    back: () => chooseLevel(subject, topic, returnTab, recommendation),
     backLabel: 'Change level',
     side: `<span class="muted">${subject.name}</span>`,
   });
@@ -442,7 +451,7 @@ function reviewPlan(subject, topic, level, fromHome, recommendation) {
     state.plans[subject.id] = { topicId: topic.id, levels };
     state.subject = subject.id;
     persist();
-    if (fromHome) home('learn');
+    if (returnTab) home(returnTab);
     else welcomeOffer();
   });
 }
@@ -457,10 +466,11 @@ function welcomeOffer() {
     <div class="footer-cta">
       <button type="button" class="btn banana block" data-start>Start starter lesson</button>
       <button type="button" class="textbtn" data-skip>Not now</button>
-    </div>`, { back: () => chooseLevel(subject, topic, false), backLabel: 'Change level' });
+    </div>`, { back: () => chooseLevel(subject, topic), backLabel: 'Change level' });
   node.classList.add('offer');
   click(node, '[data-start]', () => lesson(subject.id, { fromOffer: true, welcomeReward: available }));
   click(node, '[data-skip]', () => {
+    if (!state.onboarded) state.profile.since ??= localDay();
     state.onboarded = true;
     persist();
     home('learn');
@@ -469,7 +479,7 @@ function welcomeOffer() {
 
 function openTrail(id, { onBack = () => home('learn'), onWorkshop } = {}) {
   const page = mount(`<div class="trail-page">${adventureMarkup(id, onWorkshop ? 'Back to lesson' : 'Back to Learn')}</div>`);
-  dispose = mountAdventure(page, id, { onBack, onWorkshop });
+  dispose = mountAdventure(page, id, { onBack, onWorkshop, reducedMotion: reduceMotion() });
 }
 
 function lesson(sid, options = {}, initialStep = 0) {
@@ -481,11 +491,13 @@ function lesson(sid, options = {}, initialStep = 0) {
   let correct = 0;
   let finished = false;
   let response = null;
+  const speech = state.profile.read && canReadAloud() ? window.speechSynthesis : null;
 
   const node = mount(`<section class="screen" aria-label="Lesson">
     <div class="topline"><button type="button" class="textbtn" data-exit>✕ Exit lesson</button><span class="muted" data-step></span></div>
     <div data-dots></div><div data-lesson></div>
   </section>`);
+  if (speech) dispose = () => speech.cancel();
   const lessonBody = node.querySelector('[data-lesson]');
   click(node, '[data-exit]', fromOffer ? welcomeOffer : () => home('learn'));
 
@@ -498,7 +510,7 @@ function lesson(sid, options = {}, initialStep = 0) {
         <button class="textbtn tutor-help" type="button" data-hint>
           ${step ? 'Give me a hint' : 'Explain it another way'}
         </button>
-        <p data-help aria-live="polite"></p>`)}
+        <p data-help aria-live="polite">${step && state.profile.hints && !response ? TUTOR_HELP[sid][person.id][step] : ''}</p>`)}
       <details class="switch-tutor"><summary>Switch tutor</summary>${tutorChoices(person.id, 'choice')}</details>
     </div>`;
   }
@@ -564,6 +576,7 @@ function lesson(sid, options = {}, initialStep = 0) {
         button.addEventListener('click', () => {
           const right = index === question.a;
           if (right) correct++;
+          speech?.cancel();
           answers.forEach(answer => { answer.disabled = true; });
           answers[question.a].classList.add('right');
           if (!right) button.classList.add('wrong');
@@ -583,6 +596,12 @@ function lesson(sid, options = {}, initialStep = 0) {
     bindHelp(lessonBody.querySelector('.lesson-tutor'));
     node.scrollTop = 0;
     focusHeading(lessonBody);
+    if (step && speech) {
+      speech.cancel();
+      const utterance = new SpeechSynthesisUtterance(lessonBody.querySelector('.lesson-card h2').textContent);
+      utterance.lang = document.documentElement.lang;
+      speech.speak(utterance);
+    }
   }
   draw();
 }
@@ -600,8 +619,12 @@ function weekRow() {
 }
 
 function ranksTable(xp) {
-  const rows = [...RIVALS.map(([name, score]) => ({ name, score, learner: false })), { name: 'You', score: xp, learner: true }]
-    .sort((a, b) => b.score - a.score || Number(a.learner) - Number(b.learner));
+  const rows = RIVALS.map(([name, score]) => ({ name, score, learner: false }));
+  if (state.profile.league) {
+    const name = escapeHTML(state.profile.name.trim() ? displayName(state.profile) : 'You');
+    rows.push({ name, score: xp, learner: true });
+  }
+  rows.sort((a, b) => b.score - a.score || Number(a.learner) - Number(b.learner));
   return `<ol class="sample-league">${rows.map(({ name, score, learner }, index) =>
     `<li class="${learner ? 'me' : ''}"><span class="rank">${index + 1}</span><span class="rank-name">${name}${learner ? '' : ' <small>Example</small>'}</span><span class="rank-xp">${score} XP</span></li>`).join('')}</ol>`;
 }
@@ -712,13 +735,44 @@ function bindDock(node, scrollport, content) {
 
 function renderShortcut() {
   if (!shortcut) return;
-  stage.querySelector('.home .adventure-card')?.insertAdjacentHTML('beforebegin', shortcut.offer);
-  stage.querySelector('.profile-actions')?.insertAdjacentHTML('afterbegin', shortcut.help);
+  if (!stage.querySelector('.shortcut-offer')) {
+    stage.querySelector('.home .adventure-card')?.insertAdjacentHTML('beforebegin', shortcut.offer);
+  }
+  if (!stage.querySelector('.shortcut-help')) {
+    stage.querySelector('.profile-actions')?.insertAdjacentHTML('afterbegin', shortcut.help);
+  }
   shortcut.refresh();
 }
 
+function bindLearningReminder(body) {
+  const { goal, remind, reminderTime } = state.profile;
+  if (!remind) return;
+  const [hours, minutes] = reminderTime.split(':').map(Number);
+  const notice = element(`<aside class="learning-reminder" hidden>
+    <p><b>${tutor().name}’s reminder</b> Set aside ${goal} minutes for today’s practice.</p>
+    <button type="button" class="textbtn" aria-label="Dismiss today’s reminder">Dismiss</button>
+  </aside>`);
+  body.prepend(notice);
+
+  function refresh() {
+    const now = new Date();
+    const today = localDay(now);
+    const due = now.getHours() * 60 + now.getMinutes() >= hours * 60 + minutes;
+    notice.hidden = !due || today === state.lastDay || today === dismissedReminderDay;
+  }
+
+  click(notice, 'button', () => {
+    dismissedReminderDay = localDay();
+    refresh();
+    focusHeading(body);
+  });
+  refresh();
+  const timer = setInterval(refresh, 30_000);
+  return () => clearInterval(timer);
+}
+
 function home(tab) {
-  const [, label, icon, tone] = sections.find(([id]) => id === tab);
+  const [, label, icon = tab] = sections.find(([id]) => id === tab);
   const node = mount(`<div class="home">
     <header class="topbar"><a class="brand" href="../"><span class="mark sm" aria-hidden="true">L</span>Lumino</a>
       <div class="stats" aria-label="Your stats">
@@ -729,10 +783,10 @@ function home(tab) {
     </header>
     <div class="body"><div class="home-content"></div></div>
     <nav class="dock" aria-label="Sections">
-      <div class="tabs" id="section-tabs">${sections.map(([id, name, sprite, color]) =>
-        `<button type="button" class="tab" data-tab="${id}" ${id === tab ? 'aria-current="page"' : ''}>${spr(sprite, 2, color)}${name}</button>`).join('')}</div>
+      <div class="tabs" id="section-tabs">${sections.map(([id, name, tabIcon = id]) =>
+        `<button type="button" class="tab" data-tab="${id}" ${id === tab ? 'aria-current="page"' : ''}>${uiIcon(tabIcon)}${name}</button>`).join('')}</div>
       <button type="button" class="dock-expand" data-expand-dock aria-controls="section-tabs" aria-expanded="true" aria-label="${label}. Show all sections" hidden>
-        ${spr(icon, 2, tone)}${label}<span class="dock-chevron" aria-hidden="true"></span>
+        ${uiIcon(icon)}${label}<span class="dock-chevron" aria-hidden="true"></span>
       </button>
     </nav>
     </div>`);
@@ -749,7 +803,12 @@ function home(tab) {
     scroller.scrollLeft += Math.min(0, chip.left - bounds.left) || Math.max(0, chip.right - bounds.right);
   }
   focusHeading(body);
-  dispose = bindDock(node, scrollport, body);
+  const disposeDock = bindDock(node, scrollport, body);
+  const disposeReminder = tab === 'learn' ? bindLearningReminder(body) : undefined;
+  dispose = () => {
+    disposeDock();
+    disposeReminder?.();
+  };
   for (const button of node.querySelectorAll('[data-tab]')) {
     button.addEventListener('click', () => {
       if (button.dataset.tab !== tab) home(button.dataset.tab);
@@ -765,7 +824,7 @@ function learnTab(body) {
   const level = LEVELS.find(item => item.id === plan?.levels[topic?.id]);
   body.innerHTML = `<div class="subj-tabs" role="group" aria-label="Subjects">${SUBJECTS.map(item =>
     `<button type="button" class="chip" data-subject="${item.id}" aria-pressed="${item.id === subject.id}">
-      ${spr(item.icon, 2)}${item.name}</button>`).join('')}</div>
+      ${uiIcon(item.id)}${item.name}</button>`).join('')}</div>
     <div class="maphead"><h2>${subject.name}</h2>
       <button type="button" class="textbtn" data-edit>${topic ? 'Edit learning plan' : 'Choose a topic'}</button></div>
     <div class="starter-card card cur">
@@ -784,7 +843,7 @@ function learnTab(body) {
       stage.querySelector(`[data-subject="${state.subject}"]`).focus({ preventScroll: true });
     });
   }
-  click(body, '[data-edit]', () => chooseTopic(subject, true));
+  click(body, '[data-edit]', () => chooseTopic(subject, 'learn'));
   click(body, '[data-begin]', () => lesson(subject.id));
   if (level && topic && starterAvailable(subject, topic, level)) {
     click(body, '[data-topic-lesson]', () => lesson(subject.id));
@@ -821,30 +880,24 @@ function streakTab(body) {
 }
 
 function youTab(body) {
-  body.innerHTML = `<h2 class="section-title">Your tutor</h2>${tutorChoices(tutor().id, 'choice')}
-    ${state.previous.length ? `<section class="previous-achievements"><h3 class="section-title">Prior achievements</h3>
-      <p class="muted">Starter lessons you completed before this update</p>
-      <ul>${state.previous.map(id => `<li>${subjectById(id).name}</li>`).join('')}</ul></section>` : ''}
-    <div class="footer-cta profile-actions">
-      <a class="textbtn" href="../about.html">About Lumino ↗</a>
-      <button type="button" class="btn danger" data-reset>Reset my progress</button>
-      <p class="muted" data-reset-status role="status"></p>
-    </div>`;
-  bindTutorChoices(body, id => {
-    state.tutor = id;
-    persist();
-  });
-  click(body, '[data-reset]', () => {
-    if (!window.confirm('Erase your Lumino progress on this device, including prior achievements?')) return;
-    if (!clearProgress(storage)) {
-      body.querySelector('[data-reset-status]').textContent = 'Progress could not be cleared. Please try again.';
-      return;
-    }
-    state = freshProgress();
-    welcome();
+  mountProfile(body, {
+    state, tutor, tutorChoices, bindTutorChoices, persist, applyPreferences, renderShortcut,
+    openSubject: subject => chooseTopic(subject, 'you'),
+    reset: status => {
+      if (!window.confirm('Erase your Lumino progress and profile preferences on this device, including prior achievements?')) return;
+      if (!clearProgress(storage)) {
+        status.textContent = 'Progress could not be cleared. Please try again.';
+        return;
+      }
+      state = freshProgress();
+      dismissedReminderDay = undefined;
+      applyPreferences();
+      welcome();
+    },
   });
 }
 
+applyPreferences();
 drawSky();
 if (state.onboarded) home('learn');
 else if (!state.tutor) welcome();
@@ -852,9 +905,9 @@ else if (!state.subject) chooseSubject();
 else {
   const subject = subjectById(state.subject);
   const plan = state.plans[subject.id];
-  if (!plan) chooseTopic(subject, false);
+  if (!plan) chooseTopic(subject);
   else if (plan.levels[plan.topicId]) welcomeOffer();
-  else chooseLevel(subject, topicById(subject, plan.topicId), false);
+  else chooseLevel(subject, topicById(subject, plan.topicId));
 }
 
 import('./lumino-app/shortcut.mjs?v=22')

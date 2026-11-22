@@ -1,17 +1,25 @@
 # Lumino project state
 
-**Last updated 21 November 2026**
+**Last updated 22 November 2026**
 
 Lumino’s first public prototype is live. The learning loop is **Learn → Apply → Recall**, with **“Build your way through this”** as the direction for the exploration game. [Open the live prototype](https://luishowin.github.io/lumino/lumino-app/)
 
-## What’s live
+## Current prototype
 
 - Learners choose Linda or Charles, take a short confidence check and get a suggested starting point. The tutors use scripted explanations and hints.
 - Mathematics, Physics, Chemistry, Biology and English each have one playable starter lesson. Subject roadmaps preview topics for future lessons.
 - Six landscape trails include the Rice Fields bridge build and the canyon relay. Chemistry and Biology offer optional trail activities alongside their starter lessons.
+- Profile shows the learner’s actual XP, streak, completed starters and trophies, with editable name and avatar, subject plans and tutor selection. Settings cover local goals, reminders, lesson help, display preferences and the sample league.
+- The read-only guardian preview uses two sample learners. Guardian invitations, household accounts, enforcement of limits, and sound and music are future work.
 - Progress, XP and streaks are saved on the learner’s device. The prototype can work offline after a successful first load. The public site runs on GitHub Pages from `main`.
 
 The Physics and Chemistry gadget-building game, Biology Lab, Math Playground, English spaced practice and live AI tutoring are planned. Accounts, payments and full syllabus coverage are also future work.
+
+## Interface update · 22 November 2026
+
+- Added pixel-art navigation, subject and reward icons, plus four hoodie avatars. The subject artwork appears in onboarding, Learn and Profile. Trophy tiers and inactive reward states remain visually distinct.
+- Added a progressive blur below scrolling content and kept the dock controls sharp. The active starter lesson keeps the yellow outline, and the learning-plan card uses a muted `#2E4353` outline.
+- Added the Profile and Settings views without a new progress storage key. Existing progress and tutor choices carry over. New artwork and modules are included in the offline cache.
 
 ## Curriculum progress
 
@@ -44,4 +52,4 @@ Build one complete **Physics cart challenge** that connects a starter lesson to 
 
 ## Release checks
 
-The first release passed `npm run check`, `npm test` and browser checks covering desktop, mobile, saved progress and offline loading. Keep these checks in the release routine and verify the public prototype after GitHub Pages finishes publishing.
+The 22 November update passed syntax checks and all 10 progress tests. Local browser checks covered desktop and mobile layout, profile persistence, the guardian preview, reward states, dock behaviour and avatar selection. The service-worker asset list was checked against the repository files. Verify the public prototype after GitHub Pages finishes publishing.

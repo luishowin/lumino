@@ -49,12 +49,33 @@ const subjectId = value => {
 const count = value => Number.isSafeInteger(value) && value >= 0 ? value : 0;
 const day = value => Number.isInteger(value) && value >= 0 ? value : null;
 const subjectList = values => [...new Set(Array.isArray(values) ? values.map(subjectId).filter(Boolean) : [])];
+export const AVATARS = ['mint', 'banana', 'coral', 'sky'];
+export const DAILY_GOALS = [5, 10, 15, 20];
+export const NAME_LIMIT = 16;
+
+function normalizeProfile(saved) {
+  return {
+    name: typeof saved?.name === 'string' ? saved.name.slice(0, NAME_LIMIT) : '',
+    avatar: AVATARS.includes(saved?.avatar) ? saved.avatar : 'mint',
+    since: saved?.since <= 100_000_000 ? day(saved.since) : null,
+    goal: DAILY_GOALS.includes(saved?.goal) ? saved.goal : 10,
+    remind: saved?.remind === true,
+    reminderTime: typeof saved?.reminderTime === 'string' && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(saved.reminderTime)
+      ? saved.reminderTime : '17:30',
+    hints: saved?.hints === true,
+    read: saved?.read === true,
+    largeText: saved?.largeText === true,
+    reduceMotion: saved?.reduceMotion === true,
+    league: saved?.league !== false,
+  };
+}
 
 export function freshProgress() {
   return {
     tutor: null, subject: null, plans: {}, completed: [], previous: [],
     onboarded: false, xp: 0, streak: 0, bestStreak: 0, lastDay: null,
     days: [], recharges: 0, rechargeGiven: false, commit: null,
+    profile: normalizeProfile(),
   };
 }
 
@@ -102,6 +123,7 @@ function normalize(saved, readPlan = validPlan) {
   state.recharges = count(saved.recharges);
   state.rechargeGiven = saved.rechargeGiven === true;
   state.commit = TROPHIES.some(trophy => trophy.d === saved.commit) ? saved.commit : null;
+  state.profile = normalizeProfile(saved.profile);
   return state;
 }
 
@@ -194,6 +216,7 @@ export function completeLesson(state, sid, correct, welcomeOffer, today = localD
     state.recharges++;
     state.rechargeGiven = true;
   }
+  if (!state.onboarded) state.profile.since ??= today;
   state.onboarded = true;
   return { firstEver, before, gain, correct, claimed };
 }

@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hedvig+Letters+Serif&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="../adventure/adventure.css?v=21">
-  <link rel="stylesheet" href="./app.css?v=27">
+  <link rel="stylesheet" href="./app.css?v=33">
 </head>
 <body>
   <canvas id="sky" aria-hidden="true"></canvas>
@@ -61,7 +61,7 @@
         showRecovery('Lumino couldn’t load. Check your connection and try again.');
       }
       entry.type = 'module';
-      entry.src = '../app.js?v=27';
+      entry.src = '../app.js?v=33';
       entry.addEventListener('load', checkStartup);
       entry.addEventListener('error', checkStartup);
       document.body.append(entry);

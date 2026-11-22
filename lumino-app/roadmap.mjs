@@ -69,10 +69,12 @@ export function mapMarkup(subject, bands, { placement, finished, gameResults }) 
   return `<div class="roadmap" aria-label="${subject.name} roadmap">
     <svg class="roadmap-route" aria-hidden="true"><path vector-effect="non-scaling-stroke"/></svg>
     <div class="map-scenery" aria-hidden="true">${routes[subject.id].scenes.map((scene, index) =>
-      `<img src="../assets/roadmaps/${scene}.webp" alt="" loading="${index === 0 ? 'eager' : 'lazy'}" decoding="async">`).join('')}</div>
+      `<img src="../assets/roadmaps/${scene}.webp" alt="" loading="${index === 0 ? 'eager' : 'lazy'}" decoding="async">`).join('')}${
+      routes[subject.id].scenes.slice(1).map(() => '<span class="map-seam"></span>').join('')}</div>
     <div class="roadmap-bands">${bands.map(band => `
-      <section class="map-band map-band-${band.index}" aria-label="${band.level}">
+      <section class="map-band map-band-${band.index}" aria-label="${band.level}"${marker === band.index ? ' data-placement' : ''}>
         <header class="map-band-heading">
+          <span class="chapter-level" aria-hidden="true"><i></i><span>${band.level}</span><i></i></span>
           <h3>${band.topic}</h3>
           <p><span>${band.subtopic}</span> ${marker === band.index ? '<span class="placement-chip">Your level</span>' : ''}</p>
         </header>

@@ -1,6 +1,6 @@
 # Lumino project state
 
-**Last updated 22 November 2026**
+**Last updated 23 November 2026**
 
 Lumino’s first public prototype is live. The learning loop is **Learn → Apply → Recall**, with **“Build your way through this”** as the direction for the exploration game. [Open the live prototype](https://luishowin.github.io/lumino/lumino-app/)
 
@@ -21,6 +21,12 @@ The Physics and Chemistry gadget-building game, Biology Lab, Math Playground, En
 - Added a progressive blur below scrolling content and kept the dock controls sharp. The active starter lesson keeps the yellow outline, and the learning-plan card uses a muted `#2E4353` outline.
 - Added the Profile and Settings views without a new progress storage key. Existing progress and tutor choices carry over. New artwork and modules are included in the offline cache.
 - Refined the Learn roadmaps: the landscape scenery now reaches the bottom edge behind the dock, a dark scrim keeps map and dock text legible, and the join between the two scene images sits behind the middle topic marker. Removed the seam under the top bar, hid the Learn scrollbar and added about 30px more breathing room beneath the dock on desktop. On touch devices, including iOS, the bottom inset matches the side gutter so the dock does not sit too high above the bottom edge.
+
+## Chapter markers · 23 November 2026
+
+- Rebuilt the Learn roadmap headings as chapter markers. Each band now shows its level, a larger topic title and a soft radial haze instead of a solid card. The active band and its “Your level” chip use the banana accent.
+- The two landscape images now overlap in a masked crossfade with a dusk haze at the join. The route stays above the haze and below the marker text.
+- Bumped the app, roadmap module, stylesheet and offline cache versions so the new markup and styles load together.
 
 ## Curriculum progress
 
@@ -54,4 +60,4 @@ Learn now opens a four-level roadmap for each subject. It offers a next-lesson b
 
 ## Release checks
 
-The 22 November update passed syntax checks and all 15 progress tests. Local browser checks covered desktop and mobile layout, the Learn landscape backdrop and topic-marker alignment, dock spacing, the simulated iOS safe-area inset, scrollbar behaviour, profile persistence, the guardian preview, reward states and avatar selection. The service-worker asset list was checked against the repository files. Verify the public prototype after GitHub Pages finishes publishing.
+The 23 November chapter-marker update passed syntax checks and all 15 progress tests. Local browser checks covered desktop and mobile layout, the blended roadmap scenery, chapter-marker contrast and wrapping, route alignment, dock spacing, the simulated iOS safe-area inset and scrollbar behaviour. The service-worker asset list was checked against the repository files. Verify the public prototype after GitHub Pages finishes publishing.

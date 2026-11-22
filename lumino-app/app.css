@@ -549,8 +549,19 @@ body:has(.home) .storage-notice { bottom: calc(4.5rem + var(--safe-bottom)); }
 .map-scenery::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(to bottom,rgb(10 20 28 / 53%),rgb(10 20 28 / 73%))}
 .map-scenery img{display:block;width:100%;aspect-ratio:1 / 3;object-fit:cover;flex:1 0 auto;min-height:0}
-.map-scenery img:first-child{flex:0 0 calc(50% + var(--seam-shift))}
-.map-scenery img:last-child{flex:0 0 calc(50% - var(--seam-shift))}
+/* The two scenes overlap by --blend and dissolve into each other, centred on the seam where a chapter heading sits. */
+.map-scenery{--blend:clamp(8rem,34vw,11.5rem)}
+.map-scenery img:first-of-type{flex:0 0 calc(50% + var(--seam-shift) + var(--blend) / 2)}
+.map-scenery img:last-of-type{flex:0 0 calc(50% - var(--seam-shift) + var(--blend) / 2);margin-bottom:calc(var(--blend) * -1);
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-position:top,bottom;mask-position:top,bottom;
+  -webkit-mask-size:100% calc(100% - var(--blend)),100% var(--blend);mask-size:100% calc(100% - var(--blend)),100% var(--blend);
+  -webkit-mask-image:linear-gradient(#000,#000),linear-gradient(to top,transparent,rgb(0 0 0 / .06) 10%,rgb(0 0 0 / .26) 28%,rgb(0 0 0 / .6) 50%,rgb(0 0 0 / .88) 74%,#000);
+  mask-image:linear-gradient(#000,#000),linear-gradient(to top,transparent,rgb(0 0 0 / .06) 10%,rgb(0 0 0 / .26) 28%,rgb(0 0 0 / .6) 50%,rgb(0 0 0 / .88) 74%,#000)}
+/* Dusk haze over the join, so the wheat gold and valley blue meet in shadow instead of mixing into mud. */
+.map-seam{position:absolute;left:0;right:0;bottom:calc(50% + var(--seam-shift));height:0;pointer-events:none}
+.map-seam::before{content:"";position:absolute;left:0;right:0;top:calc(var(--blend) * -.62);bottom:calc(var(--blend) * -.62);
+  background:linear-gradient(transparent,rgb(10 20 28 / .3) 24%,rgb(10 20 28 / .56) 50%,rgb(10 20 28 / .3) 76%,transparent)}
 .map-band{position:relative;display:flex;flex-direction:column;flex:1;min-height:22rem;--map-gutter:clamp(.65rem,4vw,3.5rem);
   padding:1.15rem max(var(--map-gutter),var(--safe-right)) 1.45rem max(var(--map-gutter),var(--safe-left))}
 /* Band 0 sits at the visual bottom (the band stacks are column-reverse).
@@ -558,20 +569,27 @@ body:has(.home) .storage-notice { bottom: calc(4.5rem + var(--safe-bottom)); }
 .has-roadmap .map-band-0{padding-bottom:calc(var(--dock-height) + 4.6rem)}
 /* Keep any content after the map clear of the floating dock. */
 .has-roadmap .shortcut-offer{margin-bottom:calc(var(--dock-height) + 4.6rem)}
-.map-band-heading{background:rgb(10 20 28 / 89%);border-radius:.65rem;padding:.45rem .85rem}
-.map-band-heading{position:relative;z-index:3;width:fit-content;max-width:calc(100% - 2rem);margin-inline:auto;text-align:center;
-  text-shadow:0 1px 3px var(--bg),0 0 10px var(--bg)}
-.map-band-heading h3{display:flex;align-items:center;justify-content:center;gap:clamp(.4rem,2vw,.75rem);
-  font-size:1.2rem;text-wrap:balance}
-.map-band-heading h3::before,.map-band-heading h3::after{content:"";flex:none;
-  width:clamp(1rem,6vw,2.5rem);height:3px;opacity:.75;
-  background:linear-gradient(var(--mint),var(--mint)) right center/3px 3px no-repeat,
-    linear-gradient(to right,transparent,var(--mint)) center/100% 1px no-repeat}
-.map-band-heading h3::after{transform:scaleX(-1)}
-.map-band-heading p{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:.4rem;
-  color:var(--muted);font-size:.78rem}
-.map-band-heading .placement-chip{display:inline-flex;align-items:center;gap:.4rem;color:var(--mint);font-weight:700}
-.map-band-heading .placement-chip::before{content:"";width:3px;height:3px;border-radius:50%;background:currentColor}
+/* Chapter marker: type on a soft haze, no box. The haze sits under the route (z 1 < 2), the text above it (z 3). */
+.map-band-heading{position:relative;display:grid;justify-items:center;gap:.28rem;width:fit-content;max-width:calc(100% - 2rem);margin-inline:auto;
+  padding:.2rem .5rem;text-align:center;text-shadow:0 1px 2px rgb(10 20 28 / 70%),0 0 14px rgb(10 20 28 / 85%)}
+.map-band-heading::before{content:"";position:absolute;z-index:1;left:50%;top:50%;width:calc(100% + 8rem);height:calc(100% + 4rem);
+  transform:translate(-50%,-50%);pointer-events:none;
+  background:radial-gradient(closest-side,rgb(10 20 28 / 80%),rgb(10 20 28 / 58%) 52%,rgb(10 20 28 / 22%) 82%,rgb(10 20 28 / 0))}
+.map-band-heading>*{position:relative;z-index:3}
+.chapter-level{display:flex;align-items:center;gap:.55rem;color:var(--mint);
+  font:700 .66rem/1 var(--sans);letter-spacing:.2em;text-transform:uppercase}
+.chapter-level span{margin-right:-.2em}
+.chapter-level i{flex:none;width:5px;height:5px;background:currentColor;transform:rotate(45deg)}
+.chapter-level::before,.chapter-level::after{content:"";flex:none;width:clamp(1.5rem,9vw,3.4rem);height:1px;
+  background:linear-gradient(to right,transparent,currentColor)}
+.chapter-level::after{transform:scaleX(-1)}
+.map-band[data-placement] .chapter-level{color:var(--banana)}
+.map-band-heading h3{font-size:clamp(1.55rem,6.6vw,1.95rem);line-height:1.08;text-wrap:balance}
+.map-band-heading p{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:.2rem .55rem;
+  color:var(--muted);font-size:.8rem}
+.map-band-heading .placement-chip{display:inline-flex;align-items:center;padding:.14rem .5rem .14rem .45rem;
+  background:var(--banana);color:#1A1600;text-shadow:none;font-size:.64rem;font-weight:700;letter-spacing:.08em;line-height:1.2;text-transform:uppercase;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%)}
 .roadmap-route{position:absolute;inset:0;z-index:2;width:100%;height:100%;pointer-events:none;overflow:visible}
 .roadmap-route path{fill:none;stroke:var(--mint);stroke-width:5;stroke-dasharray:1 11;stroke-linecap:round;opacity:.67}
 .map-nodes{position:relative;z-index:3;flex:1;width:100%;justify-content:space-around;gap:1rem;list-style:none;margin:1rem auto 0;padding:0;max-width:37rem}

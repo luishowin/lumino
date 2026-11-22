@@ -1,4 +1,4 @@
-import { subjectById } from './curriculum.mjs?v=24';
+import { subjectById } from './curriculum.mjs?v=34';
 import { hydrate, spr, uiIcon } from './pixel-art.mjs?v=31';
 
 const children = [

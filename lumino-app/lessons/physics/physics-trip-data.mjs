@@ -66,6 +66,13 @@ export default {
         "A 3 s wait makes the full delivery take 15 s."
       ],
       "tutorLine": "Distinguish moving time from delivery time."
+    },
+    {
+      "kind": "activity",
+      "title": "Try the canyon relay",
+      "body": "Explore the Desert trail. Think about how moving and waiting each contribute to the time for a whole journey.",
+      "activityId": "desert",
+      "tutorLine": "Keep the whole journey in view."
     }
   ],
   "quiz": [

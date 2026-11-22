@@ -1,16 +1,16 @@
-import { mountOnboarding } from './lumino-app/onboarding.mjs?v=44';
-import { adventureMarkup, mountAdventure } from './adventure/game.mjs?v=30';
-import { landscape, trails } from './adventure/levels.mjs';
-import { LESSONS, RIVALS, TRAIL_LESSONS, TROPHIES, TUTORS, TUTOR_HELP } from './lumino-app/content.mjs?v=24';
+import { mountOnboarding } from './lumino-app/onboarding.mjs?v=59';
+import { adventureMarkup, mountAdventure } from './adventure/game.mjs?v=59';
+import { mountStory, storySession } from './lumino-app/story-lesson.mjs';
+import { LESSONS, RIVALS, TROPHIES, TUTORS, TUTOR_HELP } from './lumino-app/content.mjs?v=59';
 import { LEVELS, SUBJECTS, subjectById, topicById } from './lumino-app/curriculum.mjs?v=34';
 import { drawSky, hydrate, spr, uiIcon } from './lumino-app/pixel-art.mjs?v=31';
-import { boostRemaining, clearProgress, completeLesson, currentStreak, freshProgress, loadProgress, localDay, recordAnswer, saveProgress, startDailyBoost, starterLessonId, weakSkills } from './lumino-app/progress.mjs?v=34';
-import { canReadAloud, displayName, escapeHTML, mountProfile } from './lumino-app/profile.mjs?v=34';
+import { boostRemaining, clearProgress, completeLesson, currentStreak, freshProgress, loadProgress, localDay, recordAnswer, saveProgress, startDailyBoost, starterLessonId, weakSkills } from './lumino-app/progress.mjs?v=59';
+import { displayName, escapeHTML, mountProfile } from './lumino-app/profile.mjs?v=59';
 import { bindWorkshop, workshopMarkup } from './lumino-app/cart-workshop.mjs?v=34';
-import { drawDistanceGraph, getPracticeSession, MOTION_LESSONS, MOTION_SKILLS, motionSkillFor } from './lumino-app/physics-motion.mjs?v=34';
-import { CART_ID, drawRoadmap, mapMarkup, roadmapBands } from './lumino-app/roadmap.mjs?v=48';
-import { bindPractiseHome, bindSession, clearSessions, loadSessions, newSession, practiseHomeMarkup, saveSessions, sessionMarkup, sessionTitle, suggestionsFor } from './lumino-app/practise.mjs?v=3';
-import { createMockTutor } from './lumino-app/tutor-client.mjs?v=2';
+import { drawDistanceGraph, getPracticeSession, MOTION_LESSONS, MOTION_SKILLS, motionSkillFor } from './lumino-app/physics-motion.mjs?v=59';
+import { CART_ID, drawRoadmap, mapMarkup, roadmapBands } from './lumino-app/roadmap.mjs?v=59';
+import { bindPractiseHome, bindSession, clearSessions, loadSessions, newSession, practiseHomeMarkup, saveSessions, sessionMarkup, sessionTitle, suggestionsFor } from './lumino-app/practise.mjs?v=59';
+import { createMockTutor } from './lumino-app/tutor-client.mjs?v=59';
 
 const stage = document.querySelector('#stage');
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -430,161 +430,57 @@ function openTrail(id, { onBack = () => home('learn'), onWorkshop } = {}) {
   dispose = mountAdventure(page, id, { onBack, onWorkshop, reducedMotion: reduceMotion() });
 }
 
-function lesson(sid, options = {}, initialStep = 0) {
-  const { fromOffer = false, welcomeReward = false, practice = false, returnTab = 'learn' } = options;
+function lesson(sid, options = {}) {
+  const { fromOffer, welcomeReward, practice = false, returnTab = 'learn' } = options;
   const subject = subjectById(sid);
-  const baseline = LESSONS[sid];
-  const starterId = starterLessonId(sid);
-  const content = options.content ?? (sid === 'physics'
-    ? MOTION_LESSONS.find(item => item.id === starterId)
-    : { ...baseline, id: starterId, questions: [
-        { ...baseline.apply, id: `${starterId}-apply` }, { ...baseline.recall, id: `${starterId}-recall` },
-      ] });
-  const skill = options.skill ?? (sid === 'physics' ? motionSkillFor(content.id) : null);
-  const trail = !practice && content.id === starterId && trails.find(item => item.id === TRAIL_LESSONS[sid]);
-  let multiplier = options.multiplier;
-  if (multiplier === undefined && !practice && !state.lessonResults[content.id]) {
+  const content = options.content ?? LESSONS[sid];
+  const skill = options.skill ?? motionSkillFor(content.id);
+  let multiplier = 1;
+  if (!practice && !state.lessonResults[content.id]) {
     if (startDailyBoost(state)) persist();
     multiplier = boostRemaining(state) ? 2 : 1;
   }
-  const questionCount = content.questions.length;
-  const totalSteps = questionCount + 1;
-  let step = initialStep;
-  let correct = 0;
+  const session = storySession(content);
+  if (options.skill && practice) {
+    session.cards = session.cards.filter(card => [0, 5, 6].includes(card.section));
+  }
   let finished = false;
-  let response = null;
-  const speech = state.profile.read && canReadAloud() ? window.speechSynthesis : null;
-  const area = step => !step ? 'Learn' : step === questionCount ? 'Recall' : 'Apply';
-  const help = () => skill?.hints[tutor().id] ?? TUTOR_HELP[sid][tutor().id][Math.min(step, 2)];
-
-  const node = mount(`<section class="screen" aria-label="${practice ? 'Practice session' : 'Lesson'}">
-    <div class="topline"><button type="button" class="textbtn" data-exit>✕ Exit ${practice ? 'practice' : 'lesson'}</button>
-      <span class="muted" data-step></span></div>
-    <div data-dots></div><div data-lesson></div>
-  </section>`);
-  if (speech) dispose = () => speech.cancel();
-  const lessonBody = node.querySelector('[data-lesson]');
-  click(node, '[data-exit]', fromOffer ? welcome : () => home(returnTab));
-
-  function lessonTutor() {
-    const person = tutor();
-    const pose = response?.right ? 'encouraging' : step ? 'thinking' : 'greeting';
-    return `<div class="lesson-tutor">
-      ${tutorDialogue(person, pose, person.name, `
-        <p class="tutor-dialogue-feedback" data-feedback data-result="${response?.right ? 'right' : 'retry'}" role="status">${response?.message ?? ''}</p>
-        <button class="textbtn tutor-help" type="button" data-hint>
-          ${step ? 'Give me a hint' : 'Explain it another way'}
-        </button>
-        <p data-help aria-live="polite">${step && state.profile.hints && !response ? help() : ''}</p>`)}
-      <details class="switch-tutor"><summary>Switch tutor</summary>${tutorChoices(person.id, 'choice')}</details>
-    </div>`;
-  }
-
-  function bindHelp(container) {
-    const dialogue = container.querySelector('[data-tutor-dialogue]');
-    click(container, '[data-hint]', () => {
-      container.querySelector('[data-help]').textContent = help();
-      dialogue.dataset.pose = 'explaining';
-    });
-    bindTutorChoices(container, id => {
-      state.tutor = id;
-      persist();
-      const replacement = element(lessonTutor());
-      container.replaceWith(replacement);
-      hydrate(replacement);
-      bindHelp(replacement);
-      replacement.querySelector('summary').focus();
-    });
-  }
-
-  function nextStep() {
-    if (step === questionCount) {
-      if (finished) return;
-      finished = true;
-      const result = completeLesson(state, sid, correct, welcomeReward, localDay(), {
-        lessonId: content.id, multiplier, practice, questionCount,
-      });
-      persist();
-      results({ ...result, questionCount, returnTab });
-    } else {
-      step++;
-      draw();
-    }
-  }
-
-  function draw() {
-    response = null;
-    node.querySelector('[data-step]').textContent = `${area(step)} · ${step + 1} of ${totalSteps}`;
-    node.querySelector('[data-dots]').innerHTML = dots(totalSteps, step + 1);
-    const question = content.questions[step - 1];
-    const trailLink = trail ? `<div class="lesson-trail">
-      <img src="${landscape(trail)}" alt="">
-      <div><p class="muted">Optional trail</p><button type="button" class="textbtn" data-play-trail>Explore ${trail.name}</button></div>
-    </div>` : '';
-
-    lessonBody.innerHTML = step === 0
-      ? `<article class="lesson-card"><span class="tag-label">${practice ? 'Review' : 'New idea'}</span><h2>${content.title}</h2><p>${content.learn}</p>
-          ${skill?.id === 'distance-time-graphs' ? '<canvas class="distance-graph" width="400" height="220" role="img" aria-label="Distance rises from 0 to 6 metres in 2 seconds, to 18 metres in 5 seconds, then stays at 18 metres until 7 seconds."></canvas>' : ''}
-          <div class="ex">${content.ex}</div></article>
-        ${lessonTutor()}${trailLink}
-        <div class="footer-cta"><button class="btn block" type="button" data-next>Continue to Apply</button></div>`
-      : `<div class="lesson-card"><span class="tag-label">${step === questionCount ? 'Quick recall' : content.applyLabel ?? 'Apply the idea'}</span><h2>${question.q}</h2></div>
-        <div class="choices lesson-answers" role="group" aria-label="Answers">
-          ${question.o.map((answer, index) => `<button class="choice" type="button" data-answer="${index}"><b>${answer}</b></button>`).join('')}
-        </div>${lessonTutor()}<div class="footer-cta" data-answer-actions></div>`;
-
-    if (!step) {
-      const graph = lessonBody.querySelector('.distance-graph');
-      if (graph) drawDistanceGraph(graph);
-      click(lessonBody, '[data-next]', nextStep);
-      if (trail) {
-        const resume = { ...options, multiplier };
-        click(lessonBody, '[data-play-trail]', () => openTrail(trail.id, {
-          onBack: () => lesson(sid, resume),
-          onWorkshop: () => lesson(sid, resume, 1),
-        }));
-      }
-    } else {
-      const answers = [...lessonBody.querySelectorAll('[data-answer]')];
-      for (const [index, button] of answers.entries()) {
-        button.addEventListener('click', () => {
-          const right = index === question.a;
-          if (right) correct++;
-          recordAnswer(state, {
-            questionId: question.id, subject: sid, topicId: subject.starterTopic,
-            subtopicId: skill?.id ?? 'starter', skillTag: question.skillTag ?? skill?.id ?? 'starter',
-            givenAnswer: question.o[index], right,
-          });
-          persist();
-          speech?.cancel();
-          answers.forEach(answer => { answer.disabled = true; });
-          answers[question.a].classList.add('right');
-          if (!right) button.classList.add('wrong');
-          response = { right, message: `<strong>${right ? 'That’s right.' : 'Not quite.'}</strong> ${question.why}` };
-          lessonBody.querySelector('[data-tutor-dialogue]').dataset.pose = right ? 'encouraging' : 'thinking';
-          const feedback = lessonBody.querySelector('[data-feedback]');
-          feedback.dataset.result = right ? 'right' : 'retry';
-          feedback.innerHTML = response.message;
-          const nextLabel = step === questionCount ? 'See my results' : step === questionCount - 1 ? 'Continue to Recall' : 'Next question';
-          const actions = lessonBody.querySelector('[data-answer-actions]');
-          actions.innerHTML = `<button type="button" class="btn block" data-next>${nextLabel}</button>`;
-          click(actions, '[data-next]', nextStep);
-          actions.querySelector('[data-next]').focus();
+  function show() {
+    const node = mount('<section class="screen lesson-story" aria-label="Lesson"></section>');
+    dispose = mountStory(node, content, session, {
+      person: tutor(), dialogue: tutorDialogue, profile: state.profile, drawGraph: drawDistanceGraph,
+      hint: skill?.hints[tutor().id] ?? TUTOR_HELP[sid][tutor().id][0],
+      exit: fromOffer ? welcome : () => home(returnTab),
+      switchTutor() {
+        state.tutor = tutor().id === 'linda' ? 'charles' : 'linda';
+        persist();
+        show();
+        stage.querySelector('[data-action=tutor]').focus();
+      },
+      activity(id) {
+        if (id === CART_ID) launchWorkshop(show, 'Back to lesson');
+        else openTrail(id, { onBack: show, onWorkshop: show });
+      },
+      answer(question, choice) {
+        recordAnswer(state, {
+          questionId: question.id, subject: sid, topicId: subject.starterTopic,
+          subtopicId: question.skillId, skillTag: question.skillId,
+          givenAnswer: question.options[choice], right: choice === question.answer,
         });
-      }
-    }
-    hydrate(lessonBody);
-    bindHelp(lessonBody.querySelector('.lesson-tutor'));
-    node.scrollTop = 0;
-    focusHeading(lessonBody);
-    if (step && speech) {
-      speech.cancel();
-      const utterance = new SpeechSynthesisUtterance(question.q);
-      utterance.lang = document.documentElement.lang;
-      speech.speak(utterance);
-    }
+        persist();
+      },
+      finish(correct, questionCount) {
+        if (finished) return;
+        finished = true;
+        const result = completeLesson(state, sid, correct, welcomeReward, localDay(), {
+          lessonId: content.id, multiplier, practice, questionCount,
+        });
+        persist();
+        results({ ...result, questionCount, returnTab });
+      },
+    });
   }
-  draw();
+  show();
 }
 
 function weekRow() {
@@ -902,9 +798,8 @@ function openMapSheet(body, item, subject) {
   }
 }
 
-function launchWorkshop() {
-  const back = () => home('learn');
-  const workshop = screen('Cart Workshop', workshopMarkup(), { back, backLabel: 'Back to the roadmap' });
+function launchWorkshop(back = () => home('learn'), backLabel = 'Back to the roadmap') {
+  const workshop = screen('Cart Workshop', workshopMarkup(), { back, backLabel });
   bindWorkshop(workshop, {
     reducedMotion: reduceMotion,
     onComplete: () => {
@@ -946,7 +841,10 @@ function startPractice(skill, returnTab = 'practise') {
   const session = getPracticeSession(skill, state.practiceSerial);
   state.practiceSerial++;
   persist();
-  lesson('physics', { content: session, skill, practice: true, returnTab });
+  const quiz = session.questions.map(q => ({
+    type: 'mcq', id: q.id, skillId: skill.id, q: q.q, options: q.o, answer: q.a, why: q.why,
+  }));
+  lesson('physics', { content: { ...session, quiz }, skill, practice: true, returnTab });
 }
 
 function persistSessions(session) {
@@ -1004,6 +902,7 @@ function practiseTab(body) {
     onMistake: id => {
       const skill = MOTION_SKILLS.find(item => item.id === id);
       if (skill) startPractice(skill);
+      else if (id === subject.starterTopic) lesson(subject.id, { practice: true, returnTab: 'practise' });
       else practiseSession(subject, { text: `I keep getting ${topicById(subject, id)?.name ?? 'this'} wrong. Can we practise it?` });
     },
   });

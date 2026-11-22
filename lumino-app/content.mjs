@@ -2,27 +2,9 @@ export const TUTORS = [
  {id:'linda',name:'Linda',tag:'Clear and structured',hi:'I like things clear and in order.'},
  {id:'charles',name:'Charles',tag:'Relaxed and practical',hi:'I like to keep things relaxed and practical.'}
 ];
-export const LESSONS = {
- math:{title:'Balancing equations',applyLabel:'Balance an equation',learn:'An equation is a balance. Whatever you do to one side, you do to the other.',ex:'3x + 5 = 20  →  3x = 15  →  x = 5',
-  apply:{q:'The lantern needs x units of power. 2x + 4 = 12. What is x?',o:['3','4','8'],a:1,why:'Subtract 4 from both sides to get 2x = 8, then divide by 2.'},
-  recall:{q:'What is the first step in solving 2x + 4 = 12?',o:['Subtract 4 from both sides','Add 4 to both sides','Divide by 4'],a:0,why:'Undo the addition first so the x-term stands alone.'}},
- physics:{title:'Speed on the bridge',applyLabel:'Calculate the cart’s speed',learn:'Average speed is the total distance travelled divided by the total time taken.',ex:'60 m in 12 s  →  60 ÷ 12 = 5 m/s',
-  apply:{q:'The cart crosses a 60 m bridge in 12 seconds. What is its average speed?',o:['5 m/s','12 m/s','720 m/s'],a:0,why:'Divide the total distance by the total time: 60 ÷ 12 = 5 m/s.'},
-  recall:{q:'Which formula gives average speed?',o:['distance ÷ time','distance × time','time ÷ distance'],a:0,why:'Average speed tells you how much distance was covered per unit of time, on average.'}},
- chemistry:{title:'Change that lasts',applyLabel:'Identify a material change',learn:'In a physical change the substance stays the same. In a chemical change a new substance forms.',ex:'Ice melting → physical.  Wood burning → chemical.',
-  apply:{q:'An iron panel for your gadget turns orange and flaky with rust. What kind of change is that?',o:['Physical','Chemical','Neither'],a:1,why:'Rust is a new substance that forms when iron reacts with oxygen in the presence of water.'},
-  recall:{q:'Which of these is a physical change?',o:['Melting ice','Burning wood','Baking a cake'],a:0,why:'Melting only changes the state, not the substance.'}},
- biology:{title:'Power from light',applyLabel:'Predict what happens to a plant',learn:'Plants use light energy to make glucose from water and carbon dioxide. This is called photosynthesis.',ex:'carbon dioxide + water → glucose + oxygen (using light energy)',
-  apply:{q:'The garden is kept in the dark for weeks. What can the plants no longer make?',o:['Glucose','Soil','Carbon dioxide'],a:0,why:'Without light, photosynthesis stops, so no glucose is made.'},
-  recall:{q:'Which gas do plants take in for photosynthesis?',o:['Oxygen','Carbon dioxide','Nitrogen'],a:1,why:'Carbon dioxide is one of the raw materials.'}},
- english:{title:'Open with a topic sentence',applyLabel:'Choose a paragraph opening',learn:'A topic sentence tells the reader what a paragraph is about. It usually comes first.',ex:'Recycling saves energy. Making a can from old metal uses far less power…',
-  apply:{q:'Which is the best topic sentence for a paragraph about recycling?',o:['Recycling helps protect the environment in three clear ways.','I went to the shop on Tuesday.','Cans are made of metal.'],a:0,why:'It names the topic and tells the reader what is coming.'},
-  recall:{q:'Where does a topic sentence usually go?',o:['At the start of the paragraph','At the end of the book','In the middle of a sentence'],a:0,why:'Starting with it keeps the reader oriented.'}}
-};
+export { starters as LESSONS } from './lessons/index.mjs';
 export const TROPHIES = [{d:10,tone:'bronze',name:'Bronze'},{d:30,tone:'silver',name:'Silver'},{d:50,tone:'gold',name:'Gold'},{d:100,tone:'diamond',name:'Diamond'}];
 export const RIVALS = [['Amani',140],['Wanjiru',96],['Kip',52],['Zuri',33],['Otieno',12],['Naliaka',6]];
-
-export const TRAIL_LESSONS = { chemistry: 'city', biology: 'rainforest' };
 
 export const TUTOR_HELP = {
   math: {

@@ -1,4 +1,4 @@
-import { escapeHTML as esc } from './profile.mjs?v=34';
+import { escapeHTML as esc } from './profile.mjs?v=59';
 
 export const sections = ['Introduction', 'Goal', 'Definitions', 'Concept', 'Examples', 'Test', 'Summary', 'Sandbox'];
 
@@ -25,14 +25,15 @@ const list = (items, tag = 'ul') => `<${tag}>${items.map(s => `<li>${esc(s)}</li
 const formula = s => s ? `<div class="ex">${esc(s)}</div>` : '';
 const button = (action, label) => `<button type="button" class="textbtn" data-action="${action}">${label}</button>`;
 
-export function mountStory(node, lesson, session, { person, dialogue, profile, hint, answer, activity, exit, finish, drawGraph }) {
+export function mountStory(node, lesson, session, { person, dialogue, profile, hint, switchTutor, answer, activity, exit, finish, drawGraph }) {
   node.innerHTML = `<header class="topline">${button('exit', '× Exit lesson')}<span data-position></span></header>
     <div class="bars" aria-hidden="true">${sections.map(() => '<i><b></b></i>').join('')}</div>
     <article class="lesson-card story-page" data-page></article><div data-guide></div>
     <div class="story-nav"><button class="btn secondary" data-action="back">Back</button><button class="btn" data-action="next">Next</button></div>
-    <p class="story-status" role="status" aria-live="polite"></p>`;
+    <p class="story-status" role="status" aria-live="polite"></p><span class="sr" data-announcement aria-live="polite"></span>`;
   const page = node.querySelector('[data-page]');
   const status = node.querySelector('[role=status]');
+  const announcement = node.querySelector('[data-announcement]');
   const next = node.querySelector('[data-action=next]');
   const current = () => session.cards[session.position];
   const graded = lesson.quiz.filter(q => q.type === 'mcq');
@@ -76,7 +77,7 @@ export function mountStory(node, lesson, session, { person, dialogue, profile, h
           if (done) body += `<p class="story-feedback"><b>A model answer</b><br>${esc(item.model)}</p>`;
           else body += (Recognition ? button('speak', 'Speak') : '') + button('submit', 'Submit explanation');
         }
-        if (!done && profile.hints) body += `<p class="muted">${esc(hint)}</p>`;
+        if (!done) body += profile.hints ? `<p class="muted">${esc(hint)}</p>` : button('hint', 'Give me a hint');
         break;
       case 6: title = `You scored ${score()} / ${graded.length}`; body = list(item.takeaways) + formula(item.formula); break;
       case 7: title = 'Sandbox'; body = '<button class="btn" disabled>Coming soon</button>'; break;
@@ -87,14 +88,15 @@ export function mountStory(node, lesson, session, { person, dialogue, profile, h
     if (graph) drawGraph(graph);
     const line = item.tutorLine ?? lines[section];
     const pose = section === 5 ? (done ? 'encouraging' : 'thinking') : section === 0 ? 'greeting' : section >= 6 ? 'encouraging' : 'explaining';
-    node.querySelector('[data-guide]').innerHTML = dialogue(person, pose, person.name, `<p>${esc(line)}</p>`);
+    node.querySelector('[data-guide]').innerHTML = dialogue(person, pose, person.name, `<p>${esc(line)}</p>${button('tutor', person.id === 'linda' ? 'Switch to Charles' : 'Switch to Linda')}`);
     node.querySelector('[data-position]').textContent = `${sections[section]} · ${session.position + 1} of ${session.cards.length}`;
     const widths = fills(current());
     node.querySelectorAll('.bars b').forEach((b, i) => { b.style.transform = `scaleX(${widths[i]})`; });
     node.querySelector('[data-action=back]').disabled = session.position === 0;
-    next.textContent = section === 7 ? 'Finish' : 'Next';
+    next.textContent = session.position === session.cards.length - 1 ? 'Finish' : 'Next';
     next.setAttribute('aria-disabled', String(section === 5 && !done));
     status.textContent = '';
+    announcement.textContent = '';
     page.scrollTop = 0;
     if (read) {
       page.querySelector('h2').focus({ preventScroll: true });
@@ -103,8 +105,10 @@ export function mountStory(node, lesson, session, { person, dialogue, profile, h
         speech.speak(new SpeechSynthesisUtterance(page.innerText));
       }
     } else if (done) {
-      next.focus();
-      status.textContent = page.querySelector('.story-feedback')?.textContent ?? '';
+      const feedback = page.querySelector('.story-feedback');
+      feedback.scrollIntoView({ block: 'nearest' });
+      next.focus({ preventScroll: true });
+      announcement.textContent = feedback.innerText;
     }
   }
 
@@ -147,6 +151,7 @@ export function mountStory(node, lesson, session, { person, dialogue, profile, h
       render(false);
     } else switch (target.dataset.action) {
       case 'exit': exit(); break;
+      case 'tutor': switchTutor(); break;
       case 'next': go(1); break;
       case 'back': go(-1); break;
       case 'activity': activity(item.activityId); break;
@@ -154,6 +159,7 @@ export function mountStory(node, lesson, session, { person, dialogue, profile, h
         if (session.alternate.has(session.position)) session.alternate.delete(session.position);
         else session.alternate.add(session.position);
         render(); break;
+      case 'hint': status.textContent = hint; break;
       case 'speak': listen(); break;
       case 'submit': {
         const value = page.querySelector('textarea').value.trim();

@@ -2,7 +2,7 @@
 // Pure helpers (storage, markup, titles) are exported separately so they can be unit tested.
 
 import { subjectById, topicById } from './curriculum.mjs?v=34';
-import { cleanQuestion } from './tutor-client.mjs?v=2';
+import { cleanQuestion } from './tutor-client.mjs?v=59';
 
 export const PRACTISE_KEY = 'lumino.practise.v1';
 export const SESSION_GOAL = 5;

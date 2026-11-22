@@ -1,6 +1,6 @@
-import { TROPHIES } from './content.mjs?v=24';
+import { TROPHIES } from './content.mjs?v=59';
 import { LEVELS, SUBJECTS, subjectById, topicById } from './curriculum.mjs?v=34';
-import { PHYSICS_STARTER } from './physics-motion.mjs?v=34';
+import { PHYSICS_STARTER } from './physics-motion.mjs?v=59';
 
 export const PROGRESS_KEY = 'lumino.app.v4';
 const ROADMAP_KEY = 'lumino.app.v3';
@@ -145,6 +145,9 @@ function normalize(saved, readPlan = validPlan) {
   for (const [lessonId, result] of Object.entries(saved.lessonResults ?? {})) {
     if (!id(lessonId) || !count(result?.attempts)) continue;
     state.lessonResults[lessonId] = { attempts: count(result.attempts), best: result.best == null ? null : count(result.best) };
+    if (result.best != null) {
+      state.lessonResults[lessonId].bestOf = count(result.bestOf) || (lessonId.startsWith('physics-') ? 6 : 2);
+    }
   }
   for (const [gameId, result] of Object.entries(saved.gameResults ?? {})) {
     if (id(gameId) && ['completed', 'skipped'].includes(result)) state.gameResults[gameId] = result;
@@ -154,6 +157,11 @@ function normalize(saved, readPlan = validPlan) {
       subjectById(item.subject) && [item.questionId, item.topicId, item.subtopicId, item.skillTag].every(id) &&
       typeof item.right === 'boolean' && typeof item.givenAnswer === 'string' && count(item.timestamp)).slice(-ANSWER_LIMIT);
   }
+  state.answerHistory = state.answerHistory.map(event => {
+    if (event.subtopicId !== 'starter') return event;
+    const skill = subjectById(event.subject).starterTopic;
+    return { ...event, subtopicId: skill, skillTag: skill };
+  });
   state.practiceSerial = count(saved.practiceSerial);
   state.boostDay = day(saved.boostDay);
   state.boostUntil = count(saved.boostUntil);
@@ -275,9 +283,12 @@ export function completeLesson(state, sid, correct, welcomeOffer, today = localD
   const previousResult = state.lessonResults[lessonId];
   const gain = practice || previousResult ? 0 : (10 + Math.round(20 * correct / questionCount)) * multiplier;
   if (!practice) {
+    const keepBest = previousResult?.best != null &&
+      previousResult.best / previousResult.bestOf > correct / questionCount;
     state.lessonResults[lessonId] = {
       attempts: (previousResult?.attempts ?? 0) + 1,
-      best: Math.max(previousResult?.best ?? 0, correct),
+      best: keepBest ? previousResult.best : correct,
+      bestOf: keepBest ? previousResult.bestOf : questionCount,
     };
     if (lessonId === starterLessonId(sid) && !state.completed.includes(sid)) state.completed.push(sid);
   }

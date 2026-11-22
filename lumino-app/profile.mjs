@@ -1,8 +1,8 @@
 import { LEVELS, SUBJECTS, subjectById, topicById } from './curriculum.mjs?v=34';
-import { TROPHIES } from './content.mjs?v=24';
+import { TROPHIES } from './content.mjs?v=59';
 import { hydrate, spr, uiIcon } from './pixel-art.mjs?v=31';
-import { AVATARS, DAILY_GOALS, NAME_LIMIT, currentStreak } from './progress.mjs?v=34';
-import { openGuardianPreview } from './guardian-preview.mjs?v=31';
+import { AVATARS, DAILY_GOALS, NAME_LIMIT, currentStreak } from './progress.mjs?v=59';
+import { openGuardianPreview } from './guardian-preview.mjs?v=59';
 
 export const displayName = profile => profile.name.trim() || 'Learner';
 export const canReadAloud = () => 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;

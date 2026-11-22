@@ -51,7 +51,7 @@ export function adventureMarkup(trailId, backLabel = 'Back to map') {
     </div>
     <div class="adventure-footer">
       <p data-trail-status role="status"></p>
-      <button type="button" class="text-button" data-trail-skip hidden>Go to Apply</button>
+      <button type="button" class="text-button" data-trail-skip hidden>Return to lesson</button>
     </div>
   </section>`;
 }
@@ -141,7 +141,7 @@ export function mountAdventure(root, firstId, {
     pressed.clear();
     overlay.hidden = false;
     const following = trails[trails.indexOf(trail) + 1];
-    next.textContent = onWorkshop ? 'Continue to Apply' : following ? `Next trail · ${following.name}` : 'Return to the map';
+    next.textContent = onWorkshop ? 'Return to lesson' : following ? `Next trail · ${following.name}` : 'Return to the map';
     next.onclick = () => {
       if (onWorkshop) onWorkshop();
       else if (following) {

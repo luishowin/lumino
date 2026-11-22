@@ -220,12 +220,13 @@ test('roadmap nodes resolve in every subject and each Physics review has distinc
   assert.equal(MOTION_LESSONS.length, 8);
   const taughtIds = new Set();
   for (const content of MOTION_LESSONS) {
-    assert.equal(content.questions.length, 6);
-    for (const question of content.questions) {
+    const graded = content.quiz.filter(q => q.type === 'mcq');
+    assert.equal(graded.length, 6);
+    for (const question of graded) {
       assert.ok(!taughtIds.has(question.id));
       taughtIds.add(question.id);
-      assert.equal(new Set(question.o).size, 3, question.id);
-      assert.ok(question.o[question.a], question.id);
+      assert.equal(new Set(question.options).size, 4, question.id);
+      assert.ok(question.options[question.answer], question.id);
     }
   }
   for (const skill of MOTION_SKILLS) {

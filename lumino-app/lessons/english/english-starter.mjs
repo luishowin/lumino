@@ -88,7 +88,7 @@ export default {
         "Yesterday we walked to the gate."
       ],
       "answer": 1,
-      "why": "The first idea covers both environmental benefits and gives the details a purpose."
+      "why": "Saving resources connects both details: less waste and less demand for new materials."
     },
     {
       "type": "mcq",

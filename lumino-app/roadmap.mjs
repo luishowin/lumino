@@ -1,5 +1,5 @@
 import { LEVELS, topicById } from './curriculum.mjs?v=34';
-import { LESSONS } from './content.mjs?v=24';
+import { LESSONS } from './content.mjs?v=59';
 import { uiIcon } from './pixel-art.mjs?v=31';
 
 export const CART_ID = 'cart-workshop';

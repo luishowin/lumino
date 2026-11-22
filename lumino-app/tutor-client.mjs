@@ -11,7 +11,7 @@
 // Phase 2 swaps in createLiveTutor, which reads the same events from a Worker endpoint.
 // Nothing in practise.mjs changes when that happens.
 
-import { LESSONS, TUTOR_HELP } from './content.mjs?v=24';
+import { LESSONS, TUTOR_HELP } from './content.mjs?v=59';
 import { SUBJECTS, subjectById, topicById } from './curriculum.mjs?v=34';
 
 const sleep = (ms, signal) => new Promise((resolve, reject) => {
@@ -56,9 +56,9 @@ const BANK = {
 function bankFor(subjectId) {
   const subject = subjectById(subjectId) ?? SUBJECTS[0];
   const starter = LESSONS[subject.id];
-  const starterQuestions = [starter.apply, starter.recall].map((item, index) => ({
+  const starterQuestions = starter.quiz.slice(0, 2).map((item, index) => ({
     topicId: subject.starterTopic,
-    stem: item.q, options: item.o, answer: item.a, explanation: item.why, key: `${subject.id}-starter-${index}`,
+    stem: item.q, options: item.options, answer: item.answer, explanation: item.why, key: `${subject.id}-starter-${index}`,
   }));
   const extras = (BANK[subject.id] ?? []).map((item, index) => ({ ...item, key: `${subject.id}-bank-${index}` }));
   return [...extras, ...starterQuestions];
@@ -112,7 +112,7 @@ function planReply({ tutorId, subjectId, messages }) {
     const lesson = LESSONS[subject.id];
     const framing = help[0];
     return {
-      text: `${talk.open} ${lesson.learn} ${framing ? framing + ' ' : ''}For example: ${lesson.ex}. Want a question to try it out?`,
+      text: `${talk.open} ${lesson.concept[0].body} ${framing ? framing + ' ' : ''}For example: ${lesson.examples[0].steps.join(' ')}. Want a question to try it out?`,
       question: null,
     };
   }

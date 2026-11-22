@@ -9,6 +9,8 @@ import { canReadAloud, displayName, escapeHTML, mountProfile } from './lumino-ap
 import { bindWorkshop, workshopMarkup } from './lumino-app/cart-workshop.mjs?v=34';
 import { drawDistanceGraph, getPracticeSession, MOTION_LESSONS, MOTION_SKILLS, motionSkillFor } from './lumino-app/physics-motion.mjs?v=34';
 import { CART_ID, drawRoadmap, mapMarkup, roadmapBands } from './lumino-app/roadmap.mjs?v=48';
+import { bindPractiseHome, bindSession, clearSessions, loadSessions, newSession, practiseHomeMarkup, saveSessions, sessionMarkup, sessionTitle, suggestionsFor } from './lumino-app/practise.mjs?v=3';
+import { createMockTutor } from './lumino-app/tutor-client.mjs?v=2';
 
 const stage = document.querySelector('#stage');
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -19,6 +21,9 @@ const sections = [
 let storage;
 try { storage = window.localStorage; } catch {}
 let state = loadProgress(storage);
+let practiseSessions = loadSessions(storage);
+// Phase 2: swap for createLiveTutor({ endpoint }) once the Worker exists. Nothing else changes.
+const tutorClient = createMockTutor();
 let dispose;
 let shortcut;
 let dismissedReminderDay;
@@ -944,26 +949,64 @@ function startPractice(skill, returnTab = 'practise') {
   lesson('physics', { content: session, skill, practice: true, returnTab });
 }
 
+function persistSessions(session) {
+  session.updated = Date.now();
+  const firstAsk = session.messages.find(message => message.role === 'user');
+  if (firstAsk) session.title = sessionTitle(firstAsk.text);
+  if (!practiseSessions.includes(session)) practiseSessions.unshift(session);
+  practiseSessions = practiseSessions.sort((a, b) => b.updated - a.updated).slice(0, 8);
+  saveSessions(storage, practiseSessions);
+}
+
+function practiseSession(subject, { text, resume } = {}) {
+  const existing = resume ? practiseSessions.find(item => item.id === resume) : undefined;
+  const session = existing ?? newSession({ subject: subject.id, tutor: state.tutor });
+  const owner = subjectById(session.subject) || subject;
+  const person = TUTORS.find(item => item.id === session.tutor) || tutor();
+  if (existing && state.subject !== owner.id) {
+    state.subject = owner.id;
+    persist();
+  }
+  const node = mount(sessionMarkup({ tutor: person, subject: owner }));
+  dispose = bindSession(node, {
+    session, subject: owner, tutor: person, client: tutorClient, reducedMotion: reduceMotion(), initialText: text,
+    onChange: persistSessions,
+    onAnswer: ({ questionId, topicId, subjectId, right, given }) => {
+      recordAnswer(state, {
+        questionId, subject: subjectId, topicId, subtopicId: topicId, skillTag: topicId, givenAnswer: given, right,
+      });
+      persist();
+    },
+    onExit: () => home('practise'),
+  });
+}
+
 function practiseTab(body) {
   const subject = selectedSubject();
-  const weak = weakSkills(state, subject.id);
   const physics = subject.id === 'physics';
-  const skills = weak.map(({ id }) => MOTION_SKILLS.find(skill => skill.id === id)).filter(Boolean);
-  body.innerHTML = `${subjectTabs(subject)}
-    <section class="practice-panel" aria-labelledby="practice-title">
-      <h2 id="practice-title">What would you like to practise?</h2>
-      ${physics ? `<p class="muted">${skills.length
-        ? 'Review a skill you’ve missed on two or more different questions in the last 14 days.'
-        : 'Choose a skill for a short refresher and three questions.'}</p>
-        ${skills.length ? `<h3>Practise your mistakes</h3><div class="practice-choices">${skills.map(skill =>
-          `<button class="choice" type="button" data-skill="${skill.id}"><b>${skill.title}</b>
-          <small>${weak.find(item => item.id === skill.id).misses} different questions missed</small></button>`).join('')}</div>` : ''}
-        <h3>Choose a skill</h3><div class="practice-choices">${MOTION_SKILLS.map(skill =>
-          `<button class="choice" type="button" data-skill="${skill.id}"><b>${skill.title}</b></button>`).join('')}</div>`
-        : `<p class="muted">Revisit the ${subject.name} starter with ${tutor().name}.</p>
-          <button class="choice" type="button" data-review><b>${LESSONS[subject.id].title}</b></button>`}
-    </section>`;
+  const mistakes = weakSkills(state, subject.id).map(({ id, misses }) => ({
+    id, misses, title: MOTION_SKILLS.find(skill => skill.id === id)?.title ?? topicById(subject, id)?.name,
+  })).filter(item => item.title);
+  const guided = physics
+    ? `<div class="practice-choices">${MOTION_SKILLS.map(skill =>
+        `<button class="choice" type="button" data-skill="${skill.id}"><b>${skill.title}</b></button>`).join('')}</div>`
+    : `<button class="choice" type="button" data-review><b>${LESSONS[subject.id].title}</b></button>`;
+  body.innerHTML = practiseHomeMarkup({
+    tabs: subjectTabs(subject), subject, tutor: tutor(), mistakes, sessions: practiseSessions,
+    suggestions: suggestionsFor(subject), guided,
+    guidedNote: physics ? 'Short refreshers with three questions each. They work offline.'
+      : `Revisit the ${subject.name} starter with ${tutor().name}. It works offline.`,
+  });
   bindSubjects(body, 'practise');
+  bindPractiseHome(body, {
+    onAsk: text => practiseSession(subject, { text }),
+    onResume: id => practiseSession(subject, { resume: id }),
+    onMistake: id => {
+      const skill = MOTION_SKILLS.find(item => item.id === id);
+      if (skill) startPractice(skill);
+      else practiseSession(subject, { text: `I keep getting ${topicById(subject, id)?.name ?? 'this'} wrong. Can we practise it?` });
+    },
+  });
   if (physics) {
     for (const button of body.querySelectorAll('[data-skill]')) {
       button.addEventListener('click', () => startPractice(MOTION_SKILLS.find(skill => skill.id === button.dataset.skill)));
@@ -1009,6 +1052,8 @@ function youTab(body) {
         status.textContent = 'Progress could not be cleared. Please try again.';
         return;
       }
+      clearSessions(storage);
+      practiseSessions = [];
       state = freshProgress();
       dismissedReminderDay = undefined;
       applyPreferences();

@@ -1,11 +1,17 @@
 export const LEVELS = [
-  { id: 'beginner', name: 'Beginner', description: 'Get to know the key ideas and try a simple example.' },
+  { id: 'beginner', name: 'Absolute beginners', description: 'Get to know the key ideas and try a worked example.' },
+  { id: 'beginner-plus', name: 'Beginner plus', description: 'Use the foundations on your own in a new example.' },
   { id: 'intermediate', name: 'Intermediate', description: 'You know the definitions and how the basic ideas fit together. Apply them in familiar situations.' },
-  { id: 'advanced', name: 'Advanced', description: 'Apply what you know to more demanding IGCSE or O Level-style questions.' },
+  { id: 'advanced', name: 'Seniors', description: 'Apply what you know to more demanding IGCSE-style questions.' },
 ];
 
 const topic = (id, name, beginner, intermediate, advanced) => ({
-  id, name, goals: { beginner, intermediate, advanced },
+  id, name, goals: {
+    beginner,
+    'beginner-plus': `Without a worked example: ${beginner[0].toLowerCase()}${beginner.slice(1)}`,
+    intermediate,
+    advanced,
+  },
 });
 
 export const SUBJECTS = [

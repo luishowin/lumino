@@ -33,13 +33,14 @@ The five handpicked Cambridge IGCSE syllabuses guide what Lumino teaches. The pr
 | Biology | 0610 | 2023–2025 |
 | First Language English | 0500 | 2027–2029 |
 
-## Proposed next milestone
+## Roadmap milestone in the local build
 
-Build one complete **Physics cart challenge** that connects a starter lesson to the exploration game. Teach average speed and friction, then let the learner assemble a cart, choose its grip, predict what will happen and run a measured test. The learner revises the cart, uses it to clear a trail section and explains the result from the measurements.
+Learn now opens a four-level roadmap for each subject. It offers a next-lesson button, tappable previews and game nodes that open the existing trail explorer. Physics Motion has eight lessons and a separate Cart Workshop. Learners fit tyres, predict where the cart will stop, compare at least two runs and choose an explanation supported by the measurements.
 
-- Show distance, time, average speed and stopping distance. Keep the starting conditions consistent so learners can compare one change at a time.
-- Treat roughly 80% realism as a design goal. Check that each relationship the lesson teaches matches a simple reference case and explain the simulation’s relevant simplifications.
-- Have an educator review the model and prompts. In a small learner test, check whether learners can connect their changes to the result and explain what the evidence shows.
+- Each run shows approach distance, time, average speed and braking distance. The simplified model holds the cart, track and braking speed constant while learners change the tyres.
+- Practise uses tagged Physics answers to find skills for review and offers fresh questions in the lesson interface. The other subjects offer starter review. Lesson-level saves preserve existing starter completions, XP and streaks.
+- Ranks includes the streak calendar, goals and trophies. The first eligible lesson each day activates a 30-minute double-XP boost.
+- Next, have an educator review the model and prompts. In a small learner test, check whether learners can connect their changes to the result and explain what the evidence shows.
 
 ## Follow-on activities
 

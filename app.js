@@ -1,15 +1,18 @@
 import { adventureMarkup, mountAdventure } from './adventure/game.mjs?v=30';
 import { landscape, trails } from './adventure/levels.mjs';
 import { LESSONS, RIVALS, TRAIL_LESSONS, TROPHIES, TUTORS, TUTOR_HELP } from './lumino-app/content.mjs?v=24';
-import { LEVELS, SUBJECTS, subjectById, topicById } from './lumino-app/curriculum.mjs?v=24';
+import { LEVELS, SUBJECTS, subjectById, topicById } from './lumino-app/curriculum.mjs?v=34';
 import { drawSky, hydrate, spr, uiIcon } from './lumino-app/pixel-art.mjs?v=31';
-import { clearProgress, completeLesson, currentStreak, freshProgress, loadProgress, localDay, saveProgress } from './lumino-app/progress.mjs?v=30';
-import { canReadAloud, displayName, escapeHTML, mountProfile } from './lumino-app/profile.mjs?v=33';
+import { boostRemaining, clearProgress, completeLesson, currentStreak, freshProgress, loadProgress, localDay, recordAnswer, saveProgress, startDailyBoost, starterLessonId, weakSkills } from './lumino-app/progress.mjs?v=34';
+import { canReadAloud, displayName, escapeHTML, mountProfile } from './lumino-app/profile.mjs?v=34';
+import { bindWorkshop, workshopMarkup } from './lumino-app/cart-workshop.mjs?v=34';
+import { drawDistanceGraph, getPracticeSession, MOTION_LESSONS, MOTION_SKILLS, motionSkillFor } from './lumino-app/physics-motion.mjs?v=34';
+import { CART_ID, drawRoadmap, mapMarkup, mapPlacementNote, roadmapBands } from './lumino-app/roadmap.mjs?v=39';
 
 const stage = document.querySelector('#stage');
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const sections = [
-  ['learn', 'Learn'], ['ranks', 'Ranks', 'trophy'], ['streak', 'Streak'], ['you', 'You'],
+  ['learn', 'Learn'], ['practise', 'Practise', 'bolt'], ['ranks', 'Ranks', 'trophy'], ['you', 'You'],
 ];
 
 let storage;
@@ -378,7 +381,6 @@ function chooseLevel(subject, topic, returnTab, recommendation) {
           <small class="level-status">${availability}${note}</small>
         </span></button>`;
     }).join('')}
-      <div class="level-preview"><span><b>Senior</b><small>AS &amp; A Level · Coming later</small></span></div>
     </div>`,
   { back: () => chooseTopic(subject, returnTab, topic.id), backLabel: 'Change topic' });
   for (const button of node.querySelectorAll('[data-level]')) {
@@ -483,23 +485,40 @@ function openTrail(id, { onBack = () => home('learn'), onWorkshop } = {}) {
 }
 
 function lesson(sid, options = {}, initialStep = 0) {
-  const { fromOffer = false, welcomeReward = false } = options;
-  const content = LESSONS[sid];
-  const trail = trails.find(item => item.id === TRAIL_LESSONS[sid]);
-  const labels = ['Learn', 'Apply', 'Recall'];
+  const { fromOffer = false, welcomeReward = false, practice = false, returnTab = 'learn' } = options;
+  const subject = subjectById(sid);
+  const baseline = LESSONS[sid];
+  const starterId = starterLessonId(sid);
+  const content = options.content ?? (sid === 'physics'
+    ? MOTION_LESSONS.find(item => item.id === starterId)
+    : { ...baseline, id: starterId, questions: [
+        { ...baseline.apply, id: `${starterId}-apply` }, { ...baseline.recall, id: `${starterId}-recall` },
+      ] });
+  const skill = options.skill ?? (sid === 'physics' ? motionSkillFor(content.id) : null);
+  const trail = !practice && content.id === starterId && trails.find(item => item.id === TRAIL_LESSONS[sid]);
+  let multiplier = options.multiplier;
+  if (multiplier === undefined && !practice && !state.lessonResults[content.id]) {
+    if (startDailyBoost(state)) persist();
+    multiplier = boostRemaining(state) ? 2 : 1;
+  }
+  const questionCount = content.questions.length;
+  const totalSteps = questionCount + 1;
   let step = initialStep;
   let correct = 0;
   let finished = false;
   let response = null;
   const speech = state.profile.read && canReadAloud() ? window.speechSynthesis : null;
+  const area = step => !step ? 'Learn' : step === questionCount ? 'Recall' : 'Apply';
+  const help = () => skill?.hints[tutor().id] ?? TUTOR_HELP[sid][tutor().id][Math.min(step, 2)];
 
-  const node = mount(`<section class="screen" aria-label="Lesson">
-    <div class="topline"><button type="button" class="textbtn" data-exit>✕ Exit lesson</button><span class="muted" data-step></span></div>
+  const node = mount(`<section class="screen" aria-label="${practice ? 'Practice session' : 'Lesson'}">
+    <div class="topline"><button type="button" class="textbtn" data-exit>✕ Exit ${practice ? 'practice' : 'lesson'}</button>
+      <span class="muted" data-step></span></div>
     <div data-dots></div><div data-lesson></div>
   </section>`);
   if (speech) dispose = () => speech.cancel();
   const lessonBody = node.querySelector('[data-lesson]');
-  click(node, '[data-exit]', fromOffer ? welcomeOffer : () => home('learn'));
+  click(node, '[data-exit]', fromOffer ? welcomeOffer : () => home(returnTab));
 
   function lessonTutor() {
     const person = tutor();
@@ -510,7 +529,7 @@ function lesson(sid, options = {}, initialStep = 0) {
         <button class="textbtn tutor-help" type="button" data-hint>
           ${step ? 'Give me a hint' : 'Explain it another way'}
         </button>
-        <p data-help aria-live="polite">${step && state.profile.hints && !response ? TUTOR_HELP[sid][person.id][step] : ''}</p>`)}
+        <p data-help aria-live="polite">${step && state.profile.hints && !response ? help() : ''}</p>`)}
       <details class="switch-tutor"><summary>Switch tutor</summary>${tutorChoices(person.id, 'choice')}</details>
     </div>`;
   }
@@ -518,7 +537,7 @@ function lesson(sid, options = {}, initialStep = 0) {
   function bindHelp(container) {
     const dialogue = container.querySelector('[data-tutor-dialogue]');
     click(container, '[data-hint]', () => {
-      container.querySelector('[data-help]').textContent = TUTOR_HELP[sid][tutor().id][step];
+      container.querySelector('[data-help]').textContent = help();
       dialogue.dataset.pose = 'explaining';
     });
     bindTutorChoices(container, id => {
@@ -533,12 +552,14 @@ function lesson(sid, options = {}, initialStep = 0) {
   }
 
   function nextStep() {
-    if (step === 2) {
+    if (step === questionCount) {
       if (finished) return;
       finished = true;
-      const result = completeLesson(state, sid, correct, welcomeReward);
+      const result = completeLesson(state, sid, correct, welcomeReward, localDay(), {
+        lessonId: content.id, multiplier, practice, questionCount,
+      });
       persist();
-      results(result);
+      results({ ...result, questionCount, returnTab });
     } else {
       step++;
       draw();
@@ -547,35 +568,48 @@ function lesson(sid, options = {}, initialStep = 0) {
 
   function draw() {
     response = null;
-    node.querySelector('[data-step]').textContent = `${labels[step]} · ${step + 1} of 3`;
-    node.querySelector('[data-dots]').innerHTML = dots(3, step + 1);
-    const question = step === 1 ? content.apply : content.recall;
+    node.querySelector('[data-step]').textContent = `${area(step)} · ${step + 1} of ${totalSteps}`;
+    node.querySelector('[data-dots]').innerHTML = dots(totalSteps, step + 1);
+    const question = content.questions[step - 1];
     const trailLink = trail ? `<div class="lesson-trail">
       <img src="${landscape(trail)}" alt="">
       <div><p class="muted">Optional trail</p><button type="button" class="textbtn" data-play-trail>Explore ${trail.name}</button></div>
     </div>` : '';
 
     lessonBody.innerHTML = step === 0
-      ? `<article class="lesson-card"><span class="tag-label">New idea</span><h2>${content.title}</h2><p>${content.learn}</p><div class="ex">${content.ex}</div></article>
+      ? `<article class="lesson-card"><span class="tag-label">${practice ? 'Review' : 'New idea'}</span><h2>${content.title}</h2><p>${content.learn}</p>
+          ${skill?.id === 'distance-time-graphs' ? '<canvas class="distance-graph" width="400" height="220" role="img" aria-label="Distance rises from 0 to 6 metres in 2 seconds, to 18 metres in 5 seconds, then stays at 18 metres until 7 seconds."></canvas>' : ''}
+          <div class="ex">${content.ex}</div></article>
         ${lessonTutor()}${trailLink}
         <div class="footer-cta"><button class="btn block" type="button" data-next>Continue to Apply</button></div>`
-      : `<div class="lesson-card"><span class="tag-label">${step === 1 ? content.applyLabel : 'Quick recall'}</span><h2>${question.q}</h2></div>
+      : `<div class="lesson-card"><span class="tag-label">${step === questionCount ? 'Quick recall' : content.applyLabel ?? 'Apply the idea'}</span><h2>${question.q}</h2></div>
         <div class="choices lesson-answers" role="group" aria-label="Answers">
           ${question.o.map((answer, index) => `<button class="choice" type="button" data-answer="${index}"><b>${answer}</b></button>`).join('')}
         </div>${lessonTutor()}<div class="footer-cta" data-answer-actions></div>`;
 
     if (!step) {
+      const graph = lessonBody.querySelector('.distance-graph');
+      if (graph) drawDistanceGraph(graph);
       click(lessonBody, '[data-next]', nextStep);
-      if (trail) click(lessonBody, '[data-play-trail]', () => openTrail(trail.id, {
-        onBack: () => lesson(sid, options),
-        onWorkshop: () => lesson(sid, options, 1),
-      }));
+      if (trail) {
+        const resume = { ...options, multiplier };
+        click(lessonBody, '[data-play-trail]', () => openTrail(trail.id, {
+          onBack: () => lesson(sid, resume),
+          onWorkshop: () => lesson(sid, resume, 1),
+        }));
+      }
     } else {
       const answers = [...lessonBody.querySelectorAll('[data-answer]')];
       for (const [index, button] of answers.entries()) {
         button.addEventListener('click', () => {
           const right = index === question.a;
           if (right) correct++;
+          recordAnswer(state, {
+            questionId: question.id, subject: sid, topicId: subject.starterTopic,
+            subtopicId: skill?.id ?? 'starter', skillTag: question.skillTag ?? skill?.id ?? 'starter',
+            givenAnswer: question.o[index], right,
+          });
+          persist();
           speech?.cancel();
           answers.forEach(answer => { answer.disabled = true; });
           answers[question.a].classList.add('right');
@@ -585,8 +619,9 @@ function lesson(sid, options = {}, initialStep = 0) {
           const feedback = lessonBody.querySelector('[data-feedback]');
           feedback.dataset.result = right ? 'right' : 'retry';
           feedback.innerHTML = response.message;
+          const nextLabel = step === questionCount ? 'See my results' : step === questionCount - 1 ? 'Continue to Recall' : 'Next question';
           const actions = lessonBody.querySelector('[data-answer-actions]');
-          actions.innerHTML = `<button type="button" class="btn block" data-next>${step === 2 ? 'See my results' : 'Continue to Recall'}</button>`;
+          actions.innerHTML = `<button type="button" class="btn block" data-next>${nextLabel}</button>`;
           click(actions, '[data-next]', nextStep);
           actions.querySelector('[data-next]').focus();
         });
@@ -598,7 +633,7 @@ function lesson(sid, options = {}, initialStep = 0) {
     focusHeading(lessonBody);
     if (step && speech) {
       speech.cancel();
-      const utterance = new SpeechSynthesisUtterance(lessonBody.querySelector('.lesson-card h2').textContent);
+      const utterance = new SpeechSynthesisUtterance(question.q);
       utterance.lang = document.documentElement.lang;
       speech.speak(utterance);
     }
@@ -629,12 +664,12 @@ function ranksTable(xp) {
     `<li class="${learner ? 'me' : ''}"><span class="rank">${index + 1}</span><span class="rank-name">${name}${learner ? '' : ' <small>Example</small>'}</span><span class="rank-xp">${score} XP</span></li>`).join('')}</ol>`;
 }
 
-function results({ correct, gain, firstEver, claimed }) {
-  const stars = [1, 2, 3].map(index => spr('star', 6, index <= correct + 1 ? '' : 'off')).join('');
+function results({ correct, gain, firstEver, claimed, questionCount, returnTab }) {
+  const stars = [1, 2, 3].map(index => spr('star', 6, index <= 1 + Math.floor(correct * 2 / questionCount) ? '' : 'off')).join('');
   story([
     scene(5500, copy(gain ? 'Lesson complete' : 'Practice complete')
       + `<div class="results-summary"><div class="stars">${stars}</div><div class="big">+${gain}</div>
-        <p class="muted">XP earned · ${correct} of 2 challenges right first time</p>
+        <p class="muted">XP earned · ${correct} of ${questionCount} challenges right first time</p>
         ${claimed ? '<p class="muted">You earned a streak recharge.</p>' : ''}</div>`),
     scene(5500, copy('Your streak')
       + `<div class="results-summary">${spr('flame', 8, '', 'pop')}<div class="big">${currentStreak(state)}</div>
@@ -645,7 +680,7 @@ function results({ correct, gain, firstEver, claimed }) {
     skipLabel: 'Skip results',
     onDone: () => {
       if (firstEver && !state.commit) chooseGoal(true);
-      else home('learn');
+      else home(returnTab);
     },
   });
 }
@@ -667,7 +702,7 @@ function chooseGoal(first) {
       choices.forEach(choice => choice.setAttribute('aria-pressed', String(choice === button)));
     });
   }
-  const next = () => home(first ? 'learn' : 'streak');
+  const next = () => home(first ? 'learn' : 'ranks');
   click(node, '[data-skip]', next);
   click(node, '[data-commit]', () => {
     state.commit = selected;
@@ -677,18 +712,20 @@ function chooseGoal(first) {
 }
 
 function bindDock(node, scrollport, content) {
+  const dock = node.querySelector('.dock');
   const tabs = node.querySelector('#section-tabs');
   const expand = node.querySelector('[data-expand-dock]');
   const current = tabs.querySelector('[aria-current="page"]');
   const input = new AbortController();
   const threshold = 12;
-  let lastTop = 0;
+  let lastTop = scrollport.scrollTop;
   let lastRange = -1;
   let travel = 0;
 
   function setCompact(compact) {
     if (compact === tabs.hidden) return;
     const focused = document.activeElement;
+    dock.classList.toggle('is-compact', compact);
     tabs.hidden = compact;
     expand.hidden = !compact;
     expand.setAttribute('aria-expanded', String(!compact));
@@ -736,7 +773,7 @@ function bindDock(node, scrollport, content) {
 function renderShortcut() {
   if (!shortcut) return;
   if (!stage.querySelector('.shortcut-offer')) {
-    stage.querySelector('.home .adventure-card')?.insertAdjacentHTML('beforebegin', shortcut.offer);
+    stage.querySelector('.home .roadmap')?.insertAdjacentHTML('afterend', shortcut.offer);
   }
   if (!stage.querySelector('.shortcut-help')) {
     stage.querySelector('.profile-actions')?.insertAdjacentHTML('afterbegin', shortcut.help);
@@ -752,7 +789,7 @@ function bindLearningReminder(body) {
     <p><b>${tutor().name}’s reminder</b> Set aside ${goal} minutes for today’s practice.</p>
     <button type="button" class="textbtn" aria-label="Dismiss today’s reminder">Dismiss</button>
   </aside>`);
-  body.prepend(notice);
+  body.querySelector('.roadmap-controls').append(notice);
 
   function refresh() {
     const now = new Date();
@@ -773,28 +810,35 @@ function bindLearningReminder(body) {
 
 function home(tab) {
   const [, label, icon = tab] = sections.find(([id]) => id === tab);
-  const node = mount(`<div class="home">
+  const node = mount(`<div class="home${tab === 'learn' ? ' has-roadmap' : ''}">
     <header class="topbar"><a class="brand" href="../"><span class="mark sm" aria-hidden="true">L</span>Lumino</a>
       <div class="stats" aria-label="Your stats">
-        <span class="stat" title="Day streak">${spr('flame', 2)}${currentStreak(state)}<span class="sr"> day streak</span></span>
+        <button class="stat stat-link" type="button" data-open-streak title="Open your streak in Ranks">${spr('flame', 2)}${currentStreak(state)}<span class="sr"> day streak</span></button>
         <span class="stat" title="Streak recharges">${spr('bolt', 2)}${state.recharges}<span class="sr"> streak recharges</span></span>
         <span class="stat" title="XP">${spr('star', 2)}${state.xp}<span class="sr"> XP</span></span>
+        <span class="stat boost-chip" data-boost hidden title="Double XP time remaining"></span>
       </div>
     </header>
     <div class="body"><div class="home-content"></div></div>
-    <nav class="dock" aria-label="Sections">
+    <div class="dock">
+      <nav class="dock-menu" aria-label="Sections">
       <div class="tabs" id="section-tabs">${sections.map(([id, name, tabIcon = id]) =>
         `<button type="button" class="tab" data-tab="${id}" ${id === tab ? 'aria-current="page"' : ''}>${uiIcon(tabIcon)}${name}</button>`).join('')}</div>
       <button type="button" class="dock-expand" data-expand-dock aria-controls="section-tabs" aria-expanded="true" aria-label="${label}. Show all sections" hidden>
         ${uiIcon(icon)}${label}<span class="dock-chevron" aria-hidden="true"></span>
       </button>
-    </nav>
+      </nav>
+      ${tab === 'learn' ? `<div class="daily-lesson"><button type="button" class="btn banana" data-daily
+        aria-labelledby="daily-lesson-label" aria-describedby="daily-lesson-detail"><b id="daily-lesson-label" data-daily-label></b>
+        <small id="daily-lesson-detail" data-daily-detail></small></button></div>` : ''}
+    </div>
     </div>`);
   const scrollport = node.querySelector('.body');
   const body = scrollport.querySelector('.home-content');
-  ({ learn: learnTab, ranks: ranksTab, streak: streakTab, you: youTab })[tab](body);
+  const disposeTab = ({ learn: learnTab, ranks: ranksTab, practise: practiseTab, you: youTab })[tab](body);
   hydrate(body);
   renderShortcut();
+
   const selected = body.querySelector('.subj-tabs [aria-pressed="true"]');
   if (selected) {
     const scroller = selected.parentElement;
@@ -803,12 +847,23 @@ function home(tab) {
     scroller.scrollLeft += Math.min(0, chip.left - bounds.left) || Math.max(0, chip.right - bounds.right);
   }
   focusHeading(body);
-  const disposeDock = bindDock(node, scrollport, body);
   const disposeReminder = tab === 'learn' ? bindLearningReminder(body) : undefined;
+  if (tab === 'learn') scrollport.scrollTop = scrollport.scrollHeight;
+  const disposeDock = bindDock(node, scrollport, body);
+  const disposeBoost = bindBoost(node, tab === 'learn');
   dispose = () => {
     disposeDock();
     disposeReminder?.();
+    disposeBoost();
+    if (typeof disposeTab === 'function') disposeTab();
   };
+
+  click(node, '[data-open-streak]', () => {
+    if (tab !== 'ranks') home('ranks');
+    const heading = stage.querySelector('#ranks-streak');
+    heading.focus();
+    heading.scrollIntoView({ block: 'nearest' });
+  });
   for (const button of node.querySelectorAll('[data-tab]')) {
     button.addEventListener('click', () => {
       if (button.dataset.tab !== tab) home(button.dataset.tab);
@@ -816,51 +871,188 @@ function home(tab) {
   }
 }
 
-function learnTab(body) {
-  const subject = subjectById(state.subject) || SUBJECTS[0];
-  const plan = state.plans[subject.id];
-  const done = state.completed.includes(subject.id);
-  const topic = topicById(subject, plan?.topicId);
-  const level = LEVELS.find(item => item.id === plan?.levels[topic?.id]);
-  body.innerHTML = `<div class="subj-tabs" role="group" aria-label="Subjects">${SUBJECTS.map(item =>
+const selectedSubject = () => subjectById(state.subject) || SUBJECTS[0];
+
+function subjectTabs(subject) {
+  return `<div class="subj-tabs" role="group" aria-label="Subjects">${SUBJECTS.map(item =>
     `<button type="button" class="chip" data-subject="${item.id}" aria-pressed="${item.id === subject.id}">
-      ${uiIcon(item.id)}${item.name}</button>`).join('')}</div>
-    <div class="maphead"><h2>${subject.name}</h2>
-      <button type="button" class="textbtn" data-edit>${topic ? 'Edit learning plan' : 'Choose a topic'}</button></div>
-    <div class="starter-card card cur">
-      <div><span class="tag-label">${done ? 'Completed' : 'Starter lesson'}</span><h3>${LESSONS[subject.id].title}</h3></div>
-      <button type="button" class="btn" data-begin>${done ? 'Practice again' : 'Begin lesson'}</button></div>
-    <section class="adventure-card" aria-labelledby="trail-card-title">
-      <div><h3 id="trail-card-title">Landscape trails</h3><p>Explore six landscapes, build a crossing and power the canyon relay.</p>
-        <button class="btn" type="button" data-explore>Explore the trails</button></div>
-    </section>
-    ${topic ? `<h3 class="section-title">Your learning plan</h3>${topicPlanCard(subject, topic, level, true)}` : ''}`;
+      ${uiIcon(item.id)}${item.name}</button>`).join('')}</div>`;
+}
+
+function bindSubjects(body, tab) {
   for (const button of body.querySelectorAll('[data-subject]')) {
     button.addEventListener('click', () => {
+      if (button.dataset.subject === selectedSubject().id) return;
       state.subject = button.dataset.subject;
       persist();
-      home('learn');
+      home(tab);
       stage.querySelector(`[data-subject="${state.subject}"]`).focus({ preventScroll: true });
     });
   }
-  click(body, '[data-edit]', () => chooseTopic(subject, 'learn'));
-  click(body, '[data-begin]', () => lesson(subject.id));
-  if (level && topic && starterAvailable(subject, topic, level)) {
-    click(body, '[data-topic-lesson]', () => lesson(subject.id));
+}
+
+function nextLesson(subject) {
+  const lessons = subject.id === 'physics' ? MOTION_LESSONS : [{ id: starterLessonId(subject.id) }];
+  return lessons.find(item => !state.lessonResults[item.id]);
+}
+
+function bindBoost(node, isLearn) {
+  const boost = node.querySelector('[data-boost]');
+  const countdown = node.querySelector('[data-daily-detail]');
+  const daily = node.querySelector('[data-daily]');
+  const next = isLearn ? nextLesson(selectedSubject()) : null;
+
+  function refresh() {
+    const remaining = boostRemaining(state);
+    boost.hidden = !remaining;
+    if (remaining) {
+      const seconds = Math.ceil(remaining / 1_000);
+      boost.textContent = `×2 ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+    }
+    if (!daily) return;
+    const today = localDay();
+    const offer = Boolean(next && !remaining && (state.boostDay === null || state.boostDay < today));
+    daily.querySelector('[data-daily-label]').textContent = next ? 'Start today’s lesson' : 'Review a lesson';
+    daily.classList.toggle('xp-offer', offer);
+    countdown.textContent = next && remaining ? 'Double XP is active'
+      : offer ? 'Start to unlock 30 minutes of double XP' : '';
+    countdown.hidden = !countdown.textContent;
   }
-  click(body, '[data-explore]', () => openTrail('wheat'));
+
+  if (daily) daily.onclick = () => {
+    const subject = selectedSubject();
+    if (next) lesson(subject.id, subject.id === 'physics' ? { content: next } : {});
+    else if (subject.id === 'physics') startPractice(MOTION_SKILLS[1], 'learn');
+    else lesson(subject.id, { practice: true });
+  };
+  refresh();
+  const timer = setInterval(refresh, 1_000);
+  return () => clearInterval(timer);
+}
+
+function openMapSheet(body, item, subject) {
+  const physics = subject.id === 'physics';
+  const collection = physics ? MOTION_SKILLS : [{
+    title: LESSONS[subject.id].title,
+    lessons: [{ id: starterLessonId(subject.id), title: LESSONS[subject.id].title }],
+  }];
+  const sheet = element(`<dialog class="map-sheet" aria-labelledby="map-sheet-title">
+    <form method="dialog" class="sheet-close"><button class="textbtn" autofocus>Close</button></form>
+    <h2 id="map-sheet-title">${item.title}</h2><p class="muted">${item.detail}</p>
+    ${item.available ? `<div class="sheet-skills">${collection.map(skill => `
+      <section><h3>${skill.title}</h3><div class="choices">${skill.lessons.map(item => `
+        <button class="choice" type="button" data-open-lesson="${item.id}"><b>${item.title}</b>
+          <small>${state.lessonResults[item.id] ? 'Completed · Review' : 'Start lesson'}</small></button>`).join('')}</div></section>`).join('')}</div>`
+      : '<p class="sheet-soon">Available soon</p>'}</dialog>`);
+  sheet.addEventListener('close', () => sheet.remove(), { once: true });
+  body.append(sheet);
+  sheet.showModal();
+  for (const button of sheet.querySelectorAll('[data-open-lesson]')) {
+    button.addEventListener('click', () => {
+      sheet.close();
+      const content = physics ? MOTION_LESSONS.find(item => item.id === button.dataset.openLesson) : undefined;
+      lesson(subject.id, { content });
+    });
+  }
+}
+
+function launchWorkshop() {
+  const back = () => home('learn');
+  const workshop = screen('Cart Workshop', workshopMarkup(), { back, backLabel: 'Back to the roadmap' });
+  bindWorkshop(workshop, {
+    reducedMotion: reduceMotion,
+    onComplete: () => {
+      state.gameResults[CART_ID] = 'completed';
+      persist();
+      back();
+    },
+    onSkip: () => {
+      state.gameResults[CART_ID] ??= 'skipped';
+      persist();
+      back();
+    },
+  });
+}
+
+function learnTab(body) {
+  const subject = selectedSubject();
+  const plan = state.plans[subject.id];
+  const placement = plan?.levels[plan.topicId];
+  const upcoming = nextLesson(subject);
+  const learnerLevel = LEVELS.find(level => level.id === placement)?.name ?? 'Level not set';
+  const motionSubtopic = subject.id === 'physics' ? (motionSkillFor(upcoming?.id) ?? MOTION_SKILLS[1]).title : undefined;
+  const bands = roadmapBands(subject, motionSubtopic);
+  const { topic, subtopic } = bands[0];
+  const placementNote = mapPlacementNote(placement);
+  body.innerHTML = `<div class="roadmap-controls">${subjectTabs(subject)}
+    <p class="roadmap-context"><span title="${escapeHTML(learnerLevel)}">${learnerLevel}</span><span aria-hidden="true">·</span>
+      <span title="${escapeHTML(topic)}">${topic}</span><span aria-hidden="true">·</span>
+      <span title="${escapeHTML(subtopic)}">${subtopic}</span></p>
+    <div class="maphead"><h2>${subject.name}</h2><button type="button" class="textbtn" data-edit>${plan ? 'Edit learning plan' : 'Choose your level'}</button></div>
+    ${placementNote ? `<div class="placement-note"><p>${placementNote}</p><button type="button" class="textbtn" data-jump-level>Show my level</button></div>` : ''}</div>
+    ${mapMarkup(subject, bands, { placement, finished: !upcoming, gameResults: state.gameResults })}`;
+  bindSubjects(body, 'learn');
+  click(body, '[data-edit]', () => chooseTopic(subject, 'learn'));
+  if (placementNote) {
+    click(body, '[data-jump-level]', () => {
+      const band = body.querySelector('.placement-chip').closest('.map-band');
+      band.scrollIntoView({ block: 'start' });
+      focusHeading(band);
+    });
+  }
+  const nodes = bands.flatMap(band => band.nodes);
+  for (const button of body.querySelectorAll('[data-map-node]')) {
+    const item = nodes.find(node => node.id === button.dataset.mapNode);
+    button.addEventListener('click', () => {
+      if (item.id === CART_ID) launchWorkshop();
+      else if (item.id.startsWith('trail-')) openTrail(item.id.slice(6));
+      else openMapSheet(body, item, subject);
+    });
+  }
+  return drawRoadmap(body.querySelector('.roadmap'));
+}
+
+function startPractice(skill, returnTab = 'practise') {
+  const session = getPracticeSession(skill, state.practiceSerial);
+  state.practiceSerial++;
+  persist();
+  lesson('physics', { content: session, skill, practice: true, returnTab });
+}
+
+function practiseTab(body) {
+  const subject = selectedSubject();
+  const weak = weakSkills(state, subject.id);
+  const physics = subject.id === 'physics';
+  const skills = weak.map(({ id }) => MOTION_SKILLS.find(skill => skill.id === id)).filter(Boolean);
+  body.innerHTML = `${subjectTabs(subject)}
+    <section class="practice-panel" aria-labelledby="practice-title">
+      <h2 id="practice-title">What would you like to practise?</h2>
+      ${physics ? `<p class="muted">${skills.length
+        ? 'Review a skill you’ve missed on two or more different questions in the last 14 days.'
+        : 'Choose a skill for a short refresher and three questions.'}</p>
+        ${skills.length ? `<h3>Practise your mistakes</h3><div class="practice-choices">${skills.map(skill =>
+          `<button class="choice" type="button" data-skill="${skill.id}"><b>${skill.title}</b>
+          <small>${weak.find(item => item.id === skill.id).misses} different questions missed</small></button>`).join('')}</div>` : ''}
+        <h3>Choose a skill</h3><div class="practice-choices">${MOTION_SKILLS.map(skill =>
+          `<button class="choice" type="button" data-skill="${skill.id}"><b>${skill.title}</b></button>`).join('')}</div>`
+        : `<p class="muted">Revisit the ${subject.name} starter with ${tutor().name}.</p>
+          <button class="choice" type="button" data-review><b>${LESSONS[subject.id].title}</b></button>`}
+    </section>`;
+  bindSubjects(body, 'practise');
+  if (physics) {
+    for (const button of body.querySelectorAll('[data-skill]')) {
+      button.addEventListener('click', () => startPractice(MOTION_SKILLS.find(skill => skill.id === button.dataset.skill)));
+    }
+  } else {
+    click(body, '[data-review]', () => lesson(subject.id, { practice: true, returnTab: 'practise' }));
+  }
 }
 
 function ranksTab(body) {
-  body.innerHTML = `<h2 class="section-title">Sample league</h2>
-    <p class="muted section-description">Compare your XP with fictional example scores. Your XP is saved on this device.</p>
-    ${ranksTable(state.xp)}`;
-}
-
-function streakTab(body) {
   const goal = state.commit;
   const active = currentStreak(state);
-  body.innerHTML = `<h2 class="section-title">Your streak</h2>
+  body.innerHTML = `<div class="ranks-page"><section aria-labelledby="ranks-streak">
+    <h2 class="section-title" id="ranks-streak" tabindex="-1">Your streak</h2>
     <div class="streak-count">${spr('flame', 8, active ? '' : 'off')}
       <div><div class="big">${active}</div><span class="muted">${active === 1 ? 'Day streak' : 'Days in a row'}</span></div>
     </div>${weekRow()}
@@ -875,7 +1067,10 @@ function streakTab(body) {
       const earned = state.bestStreak >= trophy.d;
       return `<div class="pick trophy">${spr('trophy', 4, earned ? trophy.tone : 'off')}<b>${trophy.d} days</b>
         <span class="t">${trophy.name}${earned ? ' · Earned' : ''}</span></div>`;
-    }).join('')}</div>`;
+    }).join('')}</div></section>
+    <section aria-labelledby="ranks-league"><h2 id="ranks-league" class="section-title">Sample league</h2>
+      <p class="muted section-description">Compare your XP with fictional example scores. Your XP is saved on this device.</p>
+      ${ranksTable(state.xp)}</section></div>`;
   click(body, '[data-goal]', () => chooseGoal(false));
 }
 

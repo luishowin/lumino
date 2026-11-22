@@ -1,7 +1,7 @@
-import { LEVELS, SUBJECTS, subjectById, topicById } from './curriculum.mjs?v=24';
+import { LEVELS, SUBJECTS, subjectById, topicById } from './curriculum.mjs?v=34';
 import { TROPHIES } from './content.mjs?v=24';
 import { hydrate, spr, uiIcon } from './pixel-art.mjs?v=31';
-import { AVATARS, DAILY_GOALS, NAME_LIMIT, currentStreak } from './progress.mjs?v=30';
+import { AVATARS, DAILY_GOALS, NAME_LIMIT, currentStreak } from './progress.mjs?v=34';
 import { openGuardianPreview } from './guardian-preview.mjs?v=31';
 
 export const displayName = profile => profile.name.trim() || 'Learner';
@@ -39,7 +39,7 @@ function subjectRow(subject, plan, completed) {
 }
 
 function profileMarkup(state, tutorPicker) {
-  const { profile, bestStreak, completed, plans, previous, xp } = state;
+  const { profile, bestStreak, completed, lessonResults, plans, previous, xp } = state;
   const name = escapeHTML(displayName(profile));
   const streak = currentStreak(state);
   const trophies = TROPHIES.filter(({ d }) => bestStreak >= d).length;
@@ -49,7 +49,7 @@ function profileMarkup(state, tutorPicker) {
   const summary = [
     [spr('flame', 3, streak ? '' : 'off'), streak, 'Day streak'],
     [spr('star', 3), xp, 'XP'],
-    [spr('bolt', 3), completed.length, 'Lessons done'],
+    [spr('bolt', 3), Object.keys(lessonResults).length, 'Lessons done'],
     [spr('trophy', 3, trophies ? 'bronze' : 'off'), `${trophies} of ${TROPHIES.length}`, 'Trophies'],
   ];
 

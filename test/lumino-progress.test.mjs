@@ -1,8 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { cartTrial } from '../lumino-app/cart-workshop.mjs';
+import { SUBJECTS } from '../lumino-app/curriculum.mjs';
+import { getPracticeSession, MOTION_LESSONS, MOTION_SKILLS } from '../lumino-app/physics-motion.mjs';
+import { roadmapBands } from '../lumino-app/roadmap.mjs';
 import {
-  PROGRESS_KEY, clearProgress, completeLesson, currentStreak,
-  freshProgress, loadProgress, saveProgress,
+  PROGRESS_KEY, boostRemaining, clearProgress, completeLesson, currentStreak,
+  freshProgress, loadProgress, localDay, recordAnswer, saveProgress, startDailyBoost, starterLessonId, weakSkills,
 } from '../lumino-app/progress.mjs';
 
 function storageWith(seeds = {}) {
@@ -151,4 +155,101 @@ test('unavailable or corrupted storage allows a fresh session', () => {
   const denied = { getItem() { throw new Error('Access denied'); }, setItem() { throw new Error('Access denied'); } };
   assert.deepEqual(loadProgress(denied), freshProgress());
   assert.equal(saveProgress(denied, freshProgress()), false);
+});
+
+test('a v4 starter completion credits exactly one lesson and survives reload', () => {
+  const storage = storageWith({ [PROGRESS_KEY]: { completed: ['physics'], xp: 30, lastDay: 20100, streak: 3 } });
+  const state = loadProgress(storage);
+  const starter = starterLessonId('physics');
+  const next = MOTION_LESSONS.find(item => item.id !== starter);
+  assert.deepEqual(state.lessonResults, { [starter]: { attempts: 1, best: null } });
+  assert.equal(completeLesson(state, 'physics', 6, false, 20100, { lessonId: starter, multiplier: 2, questionCount: 6 }).gain, 0);
+  assert.equal(completeLesson(state, 'physics', 6, false, 20100, { lessonId: next.id, multiplier: 2, questionCount: 6 }).gain, 60);
+  saveProgress(storage, state);
+  assert.equal(loadProgress(storage).xp, 90);
+  assert.deepEqual(loadProgress(storage).lessonResults, state.lessonResults);
+  assert.equal(loadProgress(storage).streak, 3);
+});
+
+test('daily boost persists, lasts 30 minutes, and starts once per local day', () => {
+  const state = freshProgress();
+  const start = new Date(2026, 10, 22, 23, 55);
+  assert.equal(startDailyBoost(state, start), true);
+  const storage = storageWith({ [PROGRESS_KEY]: state });
+  const restored = loadProgress(storage);
+  assert.equal(startDailyBoost(restored, start), false);
+  assert.equal(boostRemaining(restored, new Date(2026, 10, 23, 0, 5)), 20 * 60_000);
+  assert.equal(boostRemaining(restored, new Date(2026, 10, 23, 0, 25)), 0);
+  assert.equal(startDailyBoost(restored, new Date(2026, 10, 23, 7)), true);
+});
+
+test('two distinct recent misses surface a skill and three distinct correct answers clear it', () => {
+  const state = freshProgress();
+  const now = new Date(2026, 10, 22, 14);
+  const answer = {
+    subject: 'physics', topicId: 'speed-and-velocity', subtopicId: 'average-speed',
+    skillTag: 'average-speed', givenAnswer: '5 m/s',
+  };
+  const add = (questionId, right) => recordAnswer(state, { ...answer, questionId, right }, now.getTime());
+  add('q-1', false);
+  add('q-1', false);
+  assert.deepEqual(weakSkills(state, 'physics', now.getTime()), []);
+  add('q-2', false);
+  assert.deepEqual(weakSkills(state, 'math', now.getTime()), []);
+  assert.deepEqual(weakSkills(state, 'physics', now.getTime()), [{ id: 'average-speed', misses: 2 }]);
+  assert.deepEqual(weakSkills(state, 'physics', now.getTime() + 14 * 86_400_000), []);
+  add('review-1', true);
+  add('review-1', true);
+  add('review-2', true);
+  assert.equal(weakSkills(state, 'physics', now.getTime()).length, 1);
+  add('review-3', true);
+  assert.deepEqual(weakSkills(state, 'physics', now.getTime()), []);
+  const result = completeLesson(state, 'physics', 3, false, localDay(now), { lessonId: 'practice-average-speed', practice: true });
+  assert.equal(result.gain, 0);
+  assert.equal(state.streak, 1);
+  assert.deepEqual(state.lessonResults, {});
+});
+
+test('roadmap nodes resolve in every subject and each Physics review has distinct valid questions', () => {
+  for (const subject of SUBJECTS) {
+    const bands = roadmapBands(subject);
+    assert.equal(bands.length, 4);
+    assert.equal(bands[0].nodes[0].id, subject.starterTopic);
+    assert.equal(bands.flatMap(band => band.nodes).filter(node => node.type === 'topic' && node.available).length, 1);
+  }
+  assert.equal(MOTION_LESSONS.length, 8);
+  const taughtIds = new Set();
+  for (const content of MOTION_LESSONS) {
+    assert.equal(content.questions.length, 6);
+    for (const question of content.questions) {
+      assert.ok(!taughtIds.has(question.id));
+      taughtIds.add(question.id);
+      assert.equal(new Set(question.o).size, 3, question.id);
+      assert.ok(question.o[question.a], question.id);
+    }
+  }
+  for (const skill of MOTION_SKILLS) {
+    const reviewedIds = new Set();
+    for (let serial = 0; serial < 30; serial++) {
+      const review = getPracticeSession(skill, serial);
+      assert.equal(review.questions.length, 3);
+      for (const question of review.questions) {
+        assert.ok(!taughtIds.has(question.id) && !reviewedIds.has(question.id));
+        reviewedIds.add(question.id);
+        assert.equal(new Set(question.o).size, 3, question.id);
+        assert.ok(question.o[question.a], question.id);
+      }
+    }
+  }
+});
+
+test('tyre trials change braking distance while holding the approach constant', () => {
+  const trials = ['smooth', 'tread', 'grippy'].map(cartTrial);
+  assert.deepEqual(trials.map(trial => trial.brakingDistance), [10, 5, 3.2]);
+  assert.deepEqual(trials.map(trial => trial.stopsInZone), [false, true, true]);
+  for (const trial of trials) {
+    assert.equal(trial.approachDistance, 12);
+    assert.equal(trial.approachTime, 3);
+    assert.equal(trial.brakeSpeed, 4);
+  }
 });

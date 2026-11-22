@@ -1,7 +1,7 @@
-const CACHE = "lumino-v33";
+const CACHE = "lumino-v43";
 const ASSETS = [
   "./", "./index.html", "./lumino-app/", "./lumino-app/index.html", "./learn.html", "./about.html",
-  "./styles.css", "./landing.css", "./app.js?v=33", "./manifest.webmanifest", "./assets/lumino-icon-192.png",
+  "./styles.css", "./landing.css", "./app.js?v=43", "./manifest.webmanifest", "./assets/lumino-icon-192.png",
   "./assets/lumino-preview.png", "./assets/lumino-favicon.png", "./assets/lumino-fire-hydrant.webp", "./assets/lumino-grass-soil.webp",
   "./assets/lumino-linda.webp?v=19", "./assets/lumino-charles.webp?v=19",
   "./adventure/adventure.css?v=21", "./adventure/game.mjs?v=30", "./adventure/levels.mjs", "./adventure/art.mjs",
@@ -13,9 +13,10 @@ const ASSETS = [
   "./assets/ui-icons/biology.webp", "./assets/ui-icons/english.webp",
   "./assets/ui-icons/avatar-mint.webp", "./assets/ui-icons/avatar-banana.webp",
   "./assets/ui-icons/avatar-coral.webp", "./assets/ui-icons/avatar-sky.webp",
-  "./lumino-app/app.css?v=33", "./lumino-app/content.mjs?v=24", "./lumino-app/curriculum.mjs?v=24",
-  "./lumino-app/pixel-art.mjs?v=31", "./lumino-app/progress.mjs?v=30", "./lumino-app/shortcut.mjs?v=22",
-  "./lumino-app/profile.mjs?v=33", "./lumino-app/guardian-preview.mjs?v=31",
+  "./lumino-app/app.css?v=42", "./lumino-app/content.mjs?v=24", "./lumino-app/curriculum.mjs?v=34",
+  "./lumino-app/pixel-art.mjs?v=31", "./lumino-app/progress.mjs?v=34", "./lumino-app/shortcut.mjs?v=22",
+  "./lumino-app/profile.mjs?v=34", "./lumino-app/guardian-preview.mjs?v=31",
+  "./lumino-app/roadmap.mjs?v=39", "./lumino-app/physics-motion.mjs?v=34", "./lumino-app/cart-workshop.mjs?v=34",
   "./tutor/assets/linda-expressions.webp", "./tutor/assets/charles-expressions.webp",
   "./tutor/assets/linda-poses.webp", "./tutor/assets/charles-poses.webp",
 ];

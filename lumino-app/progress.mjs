@@ -1,5 +1,6 @@
 import { TROPHIES } from './content.mjs?v=24';
-import { LEVELS, SUBJECTS, subjectById, topicById } from './curriculum.mjs?v=24';
+import { LEVELS, SUBJECTS, subjectById, topicById } from './curriculum.mjs?v=34';
+import { PHYSICS_STARTER } from './physics-motion.mjs?v=34';
 
 export const PROGRESS_KEY = 'lumino.app.v4';
 const ROADMAP_KEY = 'lumino.app.v3';
@@ -49,6 +50,12 @@ const subjectId = value => {
 const count = value => Number.isSafeInteger(value) && value >= 0 ? value : 0;
 const day = value => Number.isInteger(value) && value >= 0 ? value : null;
 const subjectList = values => [...new Set(Array.isArray(values) ? values.map(subjectId).filter(Boolean) : [])];
+const id = value => typeof value === 'string' && /^[a-z0-9-]{1,80}$/.test(value);
+const BOOST_LENGTH = 30 * 60_000;
+const ANSWER_WINDOW = 14 * 86_400_000;
+const ANSWER_LIMIT = 400;
+
+export const starterLessonId = subject => subject === 'physics' ? PHYSICS_STARTER : `${subject}-starter`;
 export const AVATARS = ['mint', 'banana', 'coral', 'sky'];
 export const DAILY_GOALS = [5, 10, 15, 20];
 export const NAME_LIMIT = 16;
@@ -75,6 +82,8 @@ export function freshProgress() {
     tutor: null, subject: null, plans: {}, completed: [], previous: [],
     onboarded: false, xp: 0, streak: 0, bestStreak: 0, lastDay: null,
     days: [], recharges: 0, rechargeGiven: false, commit: null,
+    lessonResults: {}, gameResults: {}, answerHistory: [], practiceSerial: 0,
+    boostDay: null, boostUntil: 0,
     profile: normalizeProfile(),
   };
 }
@@ -103,6 +112,16 @@ function migratePlan(subject, value) {
   return validPlan(subject, { topicId });
 }
 
+function creditStarters(state) {
+  for (const subject of state.completed) {
+    state.lessonResults[starterLessonId(subject)] ??= { attempts: 1, best: null };
+  }
+}
+
+function recentAnswers(history, now) {
+  return history.filter(item => item.timestamp > now - ANSWER_WINDOW && item.timestamp <= now).slice(-ANSWER_LIMIT);
+}
+
 function normalize(saved, readPlan = validPlan) {
   const state = freshProgress();
   state.tutor = validTutor(saved.tutor);
@@ -123,6 +142,22 @@ function normalize(saved, readPlan = validPlan) {
   state.recharges = count(saved.recharges);
   state.rechargeGiven = saved.rechargeGiven === true;
   state.commit = TROPHIES.some(trophy => trophy.d === saved.commit) ? saved.commit : null;
+  for (const [lessonId, result] of Object.entries(saved.lessonResults ?? {})) {
+    if (!id(lessonId) || !count(result?.attempts)) continue;
+    state.lessonResults[lessonId] = { attempts: count(result.attempts), best: result.best == null ? null : count(result.best) };
+  }
+  for (const [gameId, result] of Object.entries(saved.gameResults ?? {})) {
+    if (id(gameId) && ['completed', 'skipped'].includes(result)) state.gameResults[gameId] = result;
+  }
+  if (Array.isArray(saved.answerHistory)) {
+    state.answerHistory = saved.answerHistory.filter(item => item &&
+      subjectById(item.subject) && [item.questionId, item.topicId, item.subtopicId, item.skillTag].every(id) &&
+      typeof item.right === 'boolean' && typeof item.givenAnswer === 'string' && count(item.timestamp)).slice(-ANSWER_LIMIT);
+  }
+  state.practiceSerial = count(saved.practiceSerial);
+  state.boostDay = day(saved.boostDay);
+  state.boostUntil = count(saved.boostUntil);
+  creditStarters(state);
   state.profile = normalizeProfile(saved.profile);
   return state;
 }
@@ -147,6 +182,7 @@ export function loadProgress(storage) {
       const plan = demo.plans?.[id];
       return state.plans[id] && count(plan.next) > count(plan.start);
     }).map(({ id }) => id);
+    creditStarters(state);
   }
   if (legacy) {
     state.tutor ||= validTutor(legacy.tutor) || (legacy.guide === 'male' ? 'charles' : 'linda');
@@ -193,11 +229,58 @@ export function currentStreak(state, today = localDay()) {
   return gap <= 1 || (gap === 2 && state.recharges > 0) ? state.streak : 0;
 }
 
-export function completeLesson(state, sid, correct, welcomeOffer, today = localDay()) {
-  const firstEver = state.completed.length === 0;
+export function startDailyBoost(state, now = new Date()) {
+  const today = localDay(now);
+  if (state.boostDay !== null && today <= state.boostDay) return false;
+  state.boostDay = today;
+  state.boostUntil = now.getTime() + BOOST_LENGTH;
+  return true;
+}
+
+export function boostRemaining(state, now = new Date()) {
+  if (state.boostDay === null) return 0;
+  return Math.max(0, Math.min(BOOST_LENGTH, state.boostUntil - now.getTime()));
+}
+
+export function recordAnswer(state, answer, timestamp = Date.now()) {
+  state.answerHistory = recentAnswers([...state.answerHistory, { ...answer, timestamp }], timestamp);
+}
+
+export function weakSkills(state, subject, now = Date.now()) {
+  const skills = new Map();
+  for (const answer of recentAnswers(state.answerHistory, now)) {
+    if (answer.subject !== subject) continue;
+    const skill = skills.get(answer.subtopicId) ?? { missed: new Set(), correct: new Set(), latest: 0 };
+    skills.set(answer.subtopicId, skill);
+    if (answer.right) {
+      skill.correct.add(answer.questionId);
+      if (skill.correct.size >= 3) skill.missed.clear();
+    } else {
+      skill.correct.clear();
+      skill.missed.add(answer.questionId);
+      skill.latest = answer.timestamp;
+    }
+  }
+  return [...skills.entries()]
+    .filter(([, skill]) => skill.missed.size >= 2)
+    .sort(([, a], [, b]) => b.missed.size - a.missed.size || b.latest - a.latest)
+    .map(([id, skill]) => ({ id, misses: skill.missed.size }));
+}
+
+export function completeLesson(state, sid, correct, welcomeOffer, today = localDay(), {
+  lessonId = starterLessonId(sid), multiplier = 1, practice = false, questionCount = 2,
+} = {}) {
+  const firstEver = !practice && Object.keys(state.lessonResults).length === 0;
   const before = state.xp;
-  const gain = state.completed.includes(sid) ? 0 : 10 + 10 * correct;
-  if (gain) state.completed.push(sid);
+  const previousResult = state.lessonResults[lessonId];
+  const gain = practice || previousResult ? 0 : (10 + Math.round(20 * correct / questionCount)) * multiplier;
+  if (!practice) {
+    state.lessonResults[lessonId] = {
+      attempts: (previousResult?.attempts ?? 0) + 1,
+      best: Math.max(previousResult?.best ?? 0, correct),
+    };
+    if (lessonId === starterLessonId(sid) && !state.completed.includes(sid)) state.completed.push(sid);
+  }
   state.xp += gain;
   if (state.lastDay === null || today > state.lastDay) {
     const gap = state.lastDay === null ? Infinity : today - state.lastDay;

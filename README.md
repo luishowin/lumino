@@ -12,7 +12,9 @@ In the planned exploration game, learners will apply physics and chemistry by bu
 
 That practice also builds judgment for working with AI. Learners should be able to question a suggestion, check its assumptions and evidence, and decide how to improve it.
 
-The prototype pairs learners with Linda or Charles and lets them choose a starting level for each topic. A short, optional confidence check can suggest a level. Mathematics, physics, chemistry, biology, and English each offer one Learn, Apply, and Recall starter. Topics preview learning goals for future lessons, with Senior (AS & A Level) planned. XP and streaks are saved on this device, and Ranks compares local XP with sample scores.
+The prototype pairs learners with Linda or Charles. A short, optional confidence check can suggest a starting level. Each subject has a four-level Learn roadmap with tappable previews and a button for the next playable lesson. Physics has eight Motion lessons. Mathematics, Chemistry, Biology and English each have a starter lesson. Progress, XP and streaks are saved on this device. Ranks shows the streak calendar, goals, trophies and sample league.
+
+The first new lesson started each day activates a 30-minute double-XP boost. In Practise, Physics learners can review skills they missed on two different questions in the past 14 days. Three consecutive correct answers on distinct questions clear the skill from the review list. The other subjects offer starter review.
 
 The **You** tab shows your learning summary, selected subjects and tutor. You can edit your display name, choose from four pixel-art avatars, and manage your daily goal, reminders, lesson hints, read-aloud, text size, motion and sample-league visibility. These settings stay in the current browser. Reminders appear in Learn while Lumino is open, and read-aloud uses the browser’s speech support. The guardian preview walks through a demo PIN and a read-only dashboard using sample learner data.
 
@@ -20,7 +22,7 @@ The **You** tab shows your learning summary, selected subjects and tutor. You ca
 
 Run `npm run check` and `npm test`, then `npm start` and open `http://localhost:4173`. The GitHub Pages entry point is a public introduction, and the interactive learning prototype is available at `lumino-app/`. The app uses browser-local storage and can work offline after its first successful load.
 
-The Learn tab opens six landscape trails, including the bridge-building challenge in the Rice Fields. Chemistry and biology also offer optional trail activities before Apply. Move with the arrow keys or A and D, hold Shift to run, press Space to jump, and press E to use a trail tool. The desert relay uses four-direction movement on an isometric tile grid. On-screen controls are available.
+Open Cart Workshop from the Physics roadmap to predict a stopping distance and compare tyre grip across two runs. Landscape game nodes open the existing trail explorer, including the Rice Fields bridge-building challenge and the desert relay. Move with the arrow keys or A and D, hold Shift to run, press Space to jump, and press E to use a trail tool. The desert relay uses four-direction movement on an isometric tile grid. On-screen controls are available.
 
 The activities are early prototypes and need educational review. Accounts, payments, live AI, and full curricula are not implemented.
 

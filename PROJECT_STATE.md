@@ -28,6 +28,10 @@ The Physics and Chemistry gadget-building game, Biology Lab, Math Playground, En
 - The two landscape images now overlap in a masked crossfade with a dusk haze at the join. The route stays above the haze and below the marker text.
 - Bumped the app, roadmap module, stylesheet and offline cache versions so the new markup and styles load together.
 
+## PWA icons · 23 November 2026
+
+- The installed app icons now use a white background: 192px and 512px any-purpose icons, a safe-zone maskable icon and a 180px Apple touch icon generated from the voxel mark. The transparent in-app logo and favicon are unchanged. The offline cache is now `lumino-v54`.
+
 ## Curriculum progress
 
 The five handpicked Cambridge IGCSE syllabuses guide what Lumino teaches. The private authoring workbook maps 1,466 entries to syllabus pages and links five current starters and six planned activities to objectives. Five one-page subject maps give authors a quick overview. The workbook, source PDFs and maps are kept in the local curriculum folder.
@@ -60,4 +64,4 @@ Learn now opens a four-level roadmap for each subject. It offers a next-lesson b
 
 ## Release checks
 
-The 23 November chapter-marker update passed syntax checks and all 15 progress tests. Local browser checks covered desktop and mobile layout, the blended roadmap scenery, chapter-marker contrast and wrapping, route alignment, dock spacing, the simulated iOS safe-area inset and scrollbar behaviour. The service-worker asset list was checked against the repository files. Verify the public prototype after GitHub Pages finishes publishing.
+The 23 November chapter-marker and PWA-icon update passed syntax checks and all 15 progress tests. Local browser checks covered desktop and mobile layout, the blended roadmap scenery, chapter-marker contrast and wrapping, route alignment, dock spacing, the simulated iOS safe-area inset, scrollbar behaviour and the white install icons. The service-worker asset list was checked against the repository files. Verify the public prototype after GitHub Pages finishes publishing.

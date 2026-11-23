@@ -1,0 +1,24 @@
+.prototype-preview {
+  display: flex;
+  align-items: center;
+  gap: clamp(.75rem, 3vw, 2.5rem);
+}
+.prototype-preview > a { flex: 0 1 auto; min-width: 0; }
+.prototype-preview > img {
+  display: block;
+  width: min(55%, 38rem);
+  height: auto;
+  flex: 0 0 auto;
+}
+.prototype-preview > .primary-button { margin-top: 0; }
+
+@media (max-width: 40rem) {
+  .prototype-preview {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .prototype-preview > img {
+    order: -1;
+    width: 100%;
+  }
+}

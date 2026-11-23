@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#F2F2EF">
 <title>About Lumino</title>
-<meta name="description" content="Explore five subjects and play six landscape trails in Lumino, a learning adventure built around putting ideas to work.">
+<meta name="description" content="Explore five core subjects through adventure trails and hands-on sandboxes with Lumino, a STEAM learning platform for kids.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://luishowin.github.io/lumino/">
 <meta property="og:title" content="About Lumino">
-<meta property="og:description" content="Explore five subjects and play six landscape trails in Lumino, a learning adventure built around putting ideas to work.">
+<meta property="og:description" content="Explore five core subjects through adventure trails and hands-on sandboxes with Lumino, a STEAM learning platform for kids.">
 <meta property="og:image" content="https://luishowin.github.io/lumino/assets/lumino-preview.png?v=47">
 <meta property="og:image:width" content="803">
 <meta property="og:image:height" content="374">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="About Lumino">
-<meta name="twitter:description" content="Explore five subjects and play six landscape trails in Lumino, a learning adventure built around putting ideas to work.">
+<meta name="twitter:description" content="Explore five core subjects through adventure trails and hands-on sandboxes with Lumino, a STEAM learning platform for kids.">
 <meta name="twitter:image" content="https://luishowin.github.io/lumino/assets/lumino-preview.png?v=47">
 <link rel="icon" href="assets/lumino-favicon.png?v=46" type="image/png">
 <link rel="apple-touch-icon" href="assets/lumino-apple-touch-white.png?v=64">
@@ -192,17 +192,11 @@
   .accordion details[open] .panel { animation: panel-in .4s var(--ease); }
   @keyframes panel-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 
-  .status {
-    margin-top: var(--section-gap);
-    display: flex;
-    align-items: center;
-    gap: clamp(.875rem, 3vw, 1.5rem);
-    padding: clamp(1.75rem, 4vw, 2.5rem);
-    background: var(--ash-deep);
-    font-family: var(--serif); font-size: clamp(1.125rem, 1rem + .5vw, 1.375rem);
-    line-height: 1.55;
-  }
-  .status-cue { flex: none; width: clamp(2.25rem, 7vw, 3.25rem); height: auto; }
+  .roadmap { margin: 0; padding-left: 1.75rem; max-width: 36rem; }
+  .roadmap li { padding-left: .5rem; }
+  .roadmap li + li { margin-top: 1.25rem; }
+  .roadmap li::marker { color: var(--green); font-weight: 600; }
+  .roadmap p { margin: .2rem 0 0; color: var(--charcoal-soft); }
 
   /* Footer */
   .site-footer {
@@ -254,12 +248,20 @@
   <main>
     <section class="hero">
       <p class="hero-kicker reveal" style="--i:1">A world built on curiosity</p>
-      <h1 class="reveal" style="--i:2">Build your way through this.</h1>
+      <h1 class="reveal" style="--i:2">Where will your curiosity take you?</h1>
       <p class="hero-lede reveal" style="--i:3">
-        Pick up an idea with a tutor, then put it to work. Try five starter lessons and six playable trails, including a challenge where you build a bridge across an irrigation channel.
+        Follow an adventure trail, then step into a sandbox to try an idea of your own. You might predict how a cart will move, build a bridge across an irrigation channel, or discover a second way across.
       </p>
       <div class="hero-actions reveal" style="--i:4">
         <a class="text-link" href="lumino-app/">Explore the prototype</a>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="introduction">
+      <h2 id="introduction" class="reveal">Introduction</h2>
+      <div>
+        <p class="section-intro">Lumino is a STEAM learning platform where kids explore science, technology, engineering, the arts and mathematics through play. Adventure trails give learners a problem worth solving. Sandboxes give them space to ask “What if?” and put their answers to the test.</p>
+        <p class="section-intro">A learner might predict what will happen, change one thing, and watch the result. When an idea surprises them, they have a reason to look closer. That’s how Lumino encourages kids to think creatively and find their own ways to solve problems.</p>
       </div>
     </section>
 
@@ -356,7 +358,7 @@
           <details class="reveal" style="--i:1">
             <summary>What is Lumino?</summary>
             <div class="panel">
-              <p>Lumino is a STEAM learning adventure for learners, parents and guardians. The prototype has five starter lessons and six playable trails. A planned resource center will give families ways to revisit ideas and practise together.</p>
+              <p>Lumino is a STEAM learning platform with five core subjects and several playable adventure trails. We’re developing a unique sandbox for each topic so learners can experiment with the ideas they meet along the way. A planned resource center will give families ways to revisit ideas and practise together.</p>
             </div>
           </details>
           <details class="reveal" style="--i:2">
@@ -389,18 +391,43 @@
               <p>The early prototype is available now. More learning activities and a resource center for learners, parents and guardians are planned.</p>
             </div>
           </details>
+          <details class="reveal">
+            <summary>Will Lumino be free?</summary>
+            <div class="panel">
+              <p>Pioneer testers will get free access during the pilot in recognition of the time and feedback they contribute. We’re considering lifetime access for that first group. After the pilot, we plan to offer a free tier and a paid subscription. Pricing is still undecided.</p>
+            </div>
+          </details>
         </div>
       </div>
     </section>
 
-    <p class="status reveal" style="--i:0">
-      <img class="status-cue" src="assets/lumino-fire-hydrant.webp" width="125" height="216" alt="">
-      <span>Lumino is in early development. The prototype is available to explore now.</span>
-    </p>
+    <section class="section" aria-labelledby="roadmap">
+      <h2 id="roadmap" class="reveal">The road ahead</h2>
+      <ol class="roadmap">
+        <li><strong>Working prototype · Available now</strong><p>Explore the first lessons, meet the tutors and play the adventure trails.</p></li>
+        <li><strong>Develop the platformer</strong><p>Refine how learners move through the game and interact with challenges along each trail.</p></li>
+        <li><strong>Plan the lessons</strong><p>Map out what learners will explore in each subject and how one lesson leads to the next.</p></li>
+        <li><strong>Create the learning materials</strong><p>Write the explanations, examples, practice activities and recall questions for each lesson.</p></li>
+        <li><strong>Connect lessons with play</strong><p>Match each lesson with a game challenge and a topic-specific sandbox where learners can test the idea for themselves.</p></li>
+        <li><strong>Set up the AI tutor system</strong><p>Develop guidance learners can turn to when they get stuck or want to explore a question further.</p></li>
+        <li><strong>Run the first pilot</strong><p>Invite pioneer testers to try the connected experience and help shape the next release.</p></li>
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="support">
+      <h2 id="support" class="reveal">Help bring Lumino to more learners</h2>
+      <div>
+        <p class="section-intro">We’re looking for support throughout development. Funding, computing resources and AI credits can help us build and test Lumino. An introduction to a school or a chance to pitch the project can help us reach the kids we’re building it for. If you see another way to help, we’d love to hear from you.</p>
+        <p><a class="text-link" href="mailto:hello.beben.design@gmail.com">Get in touch</a></p>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer reveal" style="--i:0">
-    <span>Lumino</span>
+    <div>
+      <small>© 2026 Lutos Learning. Lumino and its original content, artwork and software belong to Lutos Learning.</small><br>
+      <small>Help and enquiries · <a href="mailto:hello.beben.design@gmail.com">hello.beben.design@gmail.com</a></small>
+    </div>
     <a class="text-link" href="lumino-app/">Try Lumino</a>
   </footer>
 </div>

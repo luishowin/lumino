@@ -1,7 +1,7 @@
-const CACHE = "lumino-v64";
+const CACHE = "lumino-v65";
 const ASSETS = [
   "./", "./index.html", "./lumino-app/", "./lumino-app/index.html", "./learn.html", "./about.html",
-  "./styles.css", "./landing.css", "./app.js?v=62", "./manifest.webmanifest", "./assets/lumino-icon-192.png?v=46", "./assets/lumino-icon-512.png", "./assets/lumino-maskable.png",
+  "./styles.css", "./landing.css", "./app.js?v=63", "./manifest.webmanifest", "./assets/lumino-icon-192.png?v=46", "./assets/lumino-icon-512.png", "./assets/lumino-maskable.png",
   "./assets/lumino-icon-192-white.png?v=64", "./assets/lumino-icon-512-white.png?v=64", "./assets/lumino-maskable-white.png?v=64", "./assets/lumino-apple-touch-white.png?v=64",
   "./assets/lumino-preview.png?v=47", "./assets/lumino-favicon.png?v=46", "./assets/lumino-fire-hydrant.webp", "./assets/lumino-grass-soil.webp",
   "./assets/lumino-linda.webp?v=19", "./assets/lumino-charles.webp?v=19",
@@ -22,8 +22,8 @@ const ASSETS = [
   "./assets/ui-icons/avatar-coral.webp", "./assets/ui-icons/avatar-sky.webp",
   "./lumino-app/onboarding.mjs?v=59", "./lumino-app/onboarding.css?v=44",
   "./tutor/assets/linda.webp", "./tutor/assets/charles.webp",
-  "./lumino-app/app.css?v=62", "./lumino-app/practise.css?v=5", "./lumino-app/practise.mjs?v=59", "./lumino-app/tutor-client.mjs?v=59", "./lumino-app/content.mjs?v=59", "./lumino-app/curriculum.mjs?v=34",
-  "./lumino-app/pixel-art.mjs?v=31", "./lumino-app/progress.mjs?v=60", "./lumino-app/shortcut.mjs?v=22",
+  "./lumino-app/app.css?v=63", "./lumino-app/practise.css?v=5", "./lumino-app/practise.mjs?v=59", "./lumino-app/tutor-client.mjs?v=59", "./lumino-app/content.mjs?v=59", "./lumino-app/curriculum.mjs?v=34",
+  "./lumino-app/pixel-art.mjs?v=31", "./lumino-app/progress.mjs?v=60", "./lumino-app/shortcut.mjs?v=23", "./lumino-app/install-guide.mjs?v=1",
   "./lumino-app/profile.mjs?v=60", "./lumino-app/guardian-preview.mjs?v=59",
   "./lumino-app/roadmap.mjs?v=62", "./lumino-app/physics-motion.mjs?v=59", "./lumino-app/cart-workshop.mjs?v=34",
   "./lumino-app/story-lesson.css",

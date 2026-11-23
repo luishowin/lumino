@@ -621,6 +621,8 @@ function renderShortcut() {
     stage.querySelector('.profile-actions')?.insertAdjacentHTML('afterbegin', shortcut.help);
   }
   shortcut.refresh();
+  // The sheet only appears on Learn; shortcut.mjs decides if and when.
+  if (stage.querySelector('.has-roadmap')) shortcut.suggest({ progress: Object.keys(state.lessonResults).length });
 }
 
 function bindLearningReminder(body) {
@@ -948,7 +950,7 @@ drawSky();
 if (state.onboarded) home('learn');
 else welcome();
 
-import('./lumino-app/shortcut.mjs?v=22')
+import('./lumino-app/shortcut.mjs?v=23')
   .then(({ setupShortcut }) => {
     shortcut = setupShortcut(stage, storage);
     renderShortcut();

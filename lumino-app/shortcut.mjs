@@ -1,119 +1,225 @@
-const DISMISSED_KEY = 'lumino.shortcut.dismissed';
+import { SHORTCUT_KEY, benefits, detectEnvironment, finish, guideMarkup, isDue, parseRecord, serialize, snooze } from './install-guide.mjs?v=1';
 
-function shortcutInstructions(agent, appleMobile, safariMac) {
-  const separateProgress = '<p>The app starts with a fresh learning profile. Your existing progress stays in your browser.</p>';
-
-  if (appleMobile) {
-    return `<p>In Safari, tap Share and choose <strong>Add to Home Screen</strong>. Turn on <strong>Open as Web App</strong>, then tap Add.</p>${separateProgress}`;
-  }
-  if (safariMac) {
-    return `<p>In Safari on macOS Sonoma or later, choose <strong>File → Add to Dock</strong>, then click Add.</p>${separateProgress}`;
-  }
-  if (/Android/.test(agent)) {
-    return '<p>Open your browser menu and choose <strong>Install</strong> or <strong>Add to Home Screen</strong>. In Chrome, look under Install and create shortcut.</p>';
-  }
-  if (/Edg\//.test(agent)) {
-    return '<p>In Edge, open the menu and choose <strong>More tools → Apps → Install this site as an app</strong>. In your list of installed apps, open Lumino’s details to create a desktop shortcut.</p>';
-  }
-  if (/Chrome\//.test(agent) && !/OPR\/|Vivaldi\//.test(agent)) {
-    return '<p>In Chrome, open the menu and choose <strong>Cast, save and share → Create shortcut</strong> to save Lumino to your desktop.</p>';
-  }
-  return '<p>Drag the site icon next to the browser address to your desktop. Reopen it in the same browser profile to keep your progress.</p>';
-}
+const SUGGEST_DELAY = 2500;
 
 export function setupShortcut(stage, storage) {
   const standalone = matchMedia('(display-mode: standalone)');
   const inApp = () => standalone.matches || navigator.standalone === true;
-  const agent = navigator.userAgent;
-  const mac = /Macintosh/.test(agent);
-  const appleMobile = /iPad|iPhone|iPod/.test(agent) || (mac && navigator.maxTouchPoints > 1);
-  const safariMac = mac && /Version\/[\d.]+.*Safari\//.test(agent);
-  const instructions = shortcutInstructions(agent, appleMobile, safariMac);
-  let dismissed = false;
+  const env = detectEnvironment(navigator.userAgent, navigator.maxTouchPoints);
+  const here = location.href.split('#')[0];
+  const guidance = guideMarkup(env, here);
+  // iOS and in-app browsers keep a separate copy of the learner's progress, so ask early there.
+  const askEarly = env.kind === 'ios' || env.kind === 'webview';
+
+  let record = parseRecord(read());
   let pendingPrompt;
   let prompting = false;
-  try { dismissed = storage?.getItem(DISMISSED_KEY) === '1'; } catch {}
+  let sheet;
+  let decided = false;
+  let timer = 0;
+  let suggested = false;
+  if (read() === '1') write(record);
+
+  function read() {
+    try { return storage?.getItem(SHORTCUT_KEY) ?? null; } catch { return null; }
+  }
+  function write(next) {
+    record = next;
+    try { storage?.setItem(SHORTCUT_KEY, serialize(next)); } catch {}
+  }
+  const due = () => isDue(record) && !inApp();
 
   function refresh() {
     stage.querySelector('.shortcut-help')?.toggleAttribute('hidden', inApp());
     const offer = stage.querySelector('.shortcut-offer');
     if (!offer) return;
-    const hide = dismissed || inApp();
+    const hide = !due();
     if (hide && offer.contains(document.activeElement)) {
       offer.previousElementSibling?.querySelector('button')?.focus({ preventScroll: true });
     }
     offer.hidden = hide;
     const button = offer.querySelector('[data-shortcut-add]');
-    const guidance = offer.querySelector('.shortcut-guidance');
+    const panel = offer.querySelector('.shortcut-guidance');
     button.setAttribute('aria-disabled', String(prompting));
-    if (pendingPrompt && guidance.hidden) button.removeAttribute('aria-expanded');
-    else button.setAttribute('aria-expanded', String(!guidance.hidden));
+    if (pendingPrompt && panel.hidden) button.removeAttribute('aria-expanded');
+    else button.setAttribute('aria-expanded', String(!panel.hidden));
   }
 
-  function dismiss() {
-    dismissed = true;
-    try { storage?.setItem(DISMISSED_KEY, '1'); } catch {}
+  function later() {
+    write(snooze(record));
+    refresh();
+  }
+  function never() {
+    write(finish(record));
     refresh();
   }
 
-  window.addEventListener('beforeinstallprompt', event => {
-    event.preventDefault();
-    if (appleMobile || safariMac) return;
-    pendingPrompt = event;
-    refresh();
-  });
-  window.addEventListener('appinstalled', () => {
-    pendingPrompt = undefined;
-    dismiss();
-  });
-  if (standalone.addEventListener) standalone.addEventListener('change', refresh);
-  else standalone.addListener?.(refresh);
-
-  stage.addEventListener('click', async event => {
-    const offer = event.target.closest('.shortcut-offer');
-    if (!offer || offer.hidden) return;
-    if (event.target.closest('[data-shortcut-dismiss]')) {
-      dismiss();
-      return;
-    }
-    if (!event.target.closest('[data-shortcut-add]') || prompting) return;
-
-    const guidance = offer.querySelector('.shortcut-guidance');
-    if (!pendingPrompt || !guidance.hidden) {
-      guidance.hidden = !guidance.hidden;
-      refresh();
-      return;
-    }
-
+  // One tap: the browser shows its own confirmation, and Lumino lands on the desktop or Home Screen.
+  async function installNow() {
+    if (!pendingPrompt || prompting) return false;
     const install = pendingPrompt;
     pendingPrompt = undefined;
     prompting = true;
     refresh();
     try {
       const choice = (await install.prompt()) ?? (await install.userChoice);
-      if (choice?.outcome === 'accepted' || choice?.outcome === 'dismissed') dismiss();
-      else guidance.hidden = false;
+      if (choice?.outcome === 'accepted') never();
+      else later();
+      return true;
     } catch {
-      guidance.hidden = false;
+      return false;
     } finally {
       prompting = false;
       refresh();
     }
+  }
+
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    if (env.kind === 'ios' || env.kind === 'mac-safari') return;
+    pendingPrompt = event;
+    paintSheet();
+    refresh();
   });
+  window.addEventListener('appinstalled', () => {
+    pendingPrompt = undefined;
+    decided = true;
+    sheet?.close();
+    never();
+  });
+  if (standalone.addEventListener) standalone.addEventListener('change', refresh);
+  else standalone.addListener?.(refresh);
+
+  // --- Card at the end of the roadmap, and the Profile help: always there, never in the way ----
+
+  stage.addEventListener('click', async event => {
+    const offer = event.target.closest('.shortcut-offer');
+    if (event.target.closest('[data-install-copy]')) {
+      copyLink(event.target.closest('[data-install-copy]'));
+      return;
+    }
+    if (!offer || offer.hidden) return;
+    if (event.target.closest('[data-shortcut-dismiss]')) {
+      later();
+      return;
+    }
+    if (!event.target.closest('[data-shortcut-add]') || prompting) return;
+
+    const panel = offer.querySelector('.shortcut-guidance');
+    if (!pendingPrompt || !panel.hidden) {
+      panel.hidden = !panel.hidden;
+      refresh();
+      return;
+    }
+    if (!(await installNow())) {
+      panel.hidden = false;
+      refresh();
+    }
+  });
+
+  // --- Proactive sheet -------------------------------------------------------------------------
+
+  function sheetKind() {
+    if (env.kind === 'webview' || env.kind === 'ios') return env.kind;
+    return pendingPrompt ? 'native' : null;
+  }
+
+  function paintSheet() {
+    if (!sheet) return;
+    const kind = sheetKind();
+    if (!kind) return;
+    const heading = kind === 'webview' ? 'Open Lumino in your browser'
+      : env.mobile ? 'Add Lumino to your Home Screen' : 'Install Lumino';
+    const body = kind === 'native'
+      ? `<p class="muted">${benefits(env)}</p>
+        <div class="install-actions">
+          <button class="btn" type="button" data-install-go>Install Lumino</button>
+          <button class="textbtn" type="button" data-install-later>Not now</button>
+        </div>`
+      : `<p class="muted">${benefits(env)}</p>
+        <div class="shortcut-guidance">${guidance}</div>
+        <div class="install-actions">
+          <button class="btn" type="button" data-install-later>Got it</button>
+        </div>`;
+    sheet.innerHTML = `<div class="install-sheet-body">
+      <h2 id="install-sheet-title">${heading}</h2>${body}
+      <button class="textbtn install-never" type="button" data-install-never>Don’t ask again</button>
+    </div>`;
+  }
+
+  function closeSheet(action) {
+    if (decided) return;
+    decided = true;
+    action();
+    sheet?.close();
+  }
+
+  function openSheet() {
+    if (typeof HTMLDialogElement !== 'function' || !sheetKind()) return;
+    sheet = document.createElement('dialog');
+    sheet.className = 'install-sheet';
+    sheet.setAttribute('aria-labelledby', 'install-sheet-title');
+    decided = false;
+    paintSheet();
+    document.body.append(sheet);
+    sheet.addEventListener('click', async event => {
+      const hit = selector => event.target.closest(selector);
+      if (event.target === sheet) closeSheet(later);
+      else if (hit('[data-install-later]')) closeSheet(later);
+      else if (hit('[data-install-never]')) closeSheet(never);
+      else if (hit('[data-install-copy]')) copyLink(hit('[data-install-copy]'));
+      else if (hit('[data-install-go]')) {
+        decided = true;
+        sheet.close();
+        await installNow();
+      }
+    });
+    // Escape and "just closing it" count as Not now.
+    sheet.addEventListener('close', () => {
+      if (!decided) later();
+      sheet.remove();
+      sheet = undefined;
+    });
+    sheet.showModal();
+    suggested = true;
+  }
+
+  // Called whenever Learn is drawn. Waits for the learner to settle, and skips anything mid-task.
+  function suggest({ progress = 0 } = {}) {
+    if (suggested || timer || sheet || !due()) return;
+    if (!askEarly && progress < 1) return;
+    timer = setTimeout(() => {
+      timer = 0;
+      if (!stage.querySelector('.has-roadmap') || document.querySelector('dialog[open]') || !due()) return;
+      openSheet();
+    }, SUGGEST_DELAY);
+  }
+
+  async function copyLink(button) {
+    const input = button.parentElement.querySelector('[data-install-url]');
+    try {
+      await navigator.clipboard.writeText(here);
+      button.textContent = 'Copied';
+    } catch {
+      input?.select();
+      button.textContent = 'Select and copy';
+    }
+  }
 
   return {
     offer: `<section class="shortcut-offer" aria-labelledby="shortcut-title" hidden>
       <div><h3 id="shortcut-title">Add a Lumino shortcut</h3>
-        <p class="muted">Open Lumino from your desktop or Home Screen.</p></div>
+        <p class="muted">${benefits(env)}</p></div>
       <div class="shortcut-actions">
         <button class="btn" type="button" data-shortcut-add aria-controls="shortcut-guidance">Add shortcut</button>
         <button class="textbtn" type="button" data-shortcut-dismiss>Not now</button>
       </div>
-      <div class="shortcut-guidance" id="shortcut-guidance" hidden>${instructions}</div>
+      <div class="shortcut-guidance" id="shortcut-guidance" hidden>${guidance}</div>
     </section>`,
     help: `<details class="shortcut-help"><summary class="textbtn">Add a shortcut</summary>
-      <div class="shortcut-guidance">${instructions}</div>
+      <div class="shortcut-guidance">${guidance}</div>
     </details>`,
     refresh,
+    suggest,
   };
 }

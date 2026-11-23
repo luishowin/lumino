@@ -226,6 +226,39 @@ p{margin:0}
 .shortcut-help summary{width:fit-content;cursor:pointer}
 .shortcut-help .shortcut-guidance{margin-bottom:.6rem}
 
+/* Install sheet and the iOS walkthrough */
+.install-sheet{width:min(100% - 1.5rem,30rem);max-height:calc(100dvh - 1.5rem);margin:auto auto max(.75rem,var(--safe-bottom));padding:0;overflow:auto;overscroll-behavior:contain;
+  color:var(--text);background:var(--surface);border:var(--stroke) solid var(--line);border-radius:1.1rem}
+.install-sheet::backdrop{background:rgb(10 20 28 / 74%)}
+@media (min-width:40rem){.install-sheet{margin:auto}}
+html:not(.reduce-motion) .install-sheet[open]{animation:sheet-in .28s var(--ease)}
+@keyframes sheet-in{from{opacity:0;transform:translateY(1.25rem)}to{opacity:1;transform:none}}
+.install-sheet-body{display:grid;grid-template-columns:minmax(0,1fr);gap:.7rem;padding:1.2rem 1.15rem .4rem}
+.install-sheet .muted{font-size:.9375rem;line-height:1.45}
+.install-sheet h2{font-size:1.4rem;line-height:1.15}
+.install-actions{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap}
+.install-never{justify-self:start;min-height:2.75rem;color:var(--muted);font-size:.875rem}
+.install-steps{list-style:none;margin:0;padding:0;display:grid;gap:.7rem;counter-reset:step;font-size:.9375rem;line-height:1.4}
+.install-steps li{position:relative;padding-left:2.2rem;counter-increment:step}
+.install-steps li::before{content:counter(step);position:absolute;left:0;top:.05rem;display:grid;place-items:center;width:1.5rem;height:1.5rem;
+  border:1px solid var(--line);border-radius:50%;background:var(--surface2);color:var(--mint);font:700 .8125rem/1 var(--sans)}
+.install-note{font-size:.875rem;color:var(--muted)}
+.install-link{display:flex;align-items:center;gap:.5rem}
+.install-url{flex:1;min-width:0;min-height:2.75rem;padding:0 .7rem;color:var(--text);background:var(--surface2);
+  border:var(--stroke) solid var(--line);border-radius:.6rem;font:inherit;font-size:.875rem}
+.ios-demo{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-top:.4rem;padding:.45rem;border-radius:.9rem;background:#1C1C1E;color:#fff;font:500 .875rem/1.2 var(--sans)}
+.ios-demo--key{width:fit-content}
+.ios-glyph{width:1.4rem;height:1.4rem;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ios-key,.ios-row,.ios-add{display:inline-flex;align-items:center}
+.ios-key{justify-content:center;width:2.5rem;height:2.5rem;border-radius:50%;background:#2C2C2E}
+.ios-row{flex:1 1 9rem;justify-content:space-between;gap:.5rem;min-height:2.5rem;padding:0 .65rem;border-radius:.7rem;background:#2C2C2E}
+.ios-row span{white-space:nowrap}
+.ios-item{justify-content:flex-start}
+.ios-toggle{position:relative;flex:none;width:2.4rem;height:1.5rem;border-radius:99px;background:#30D158}
+.ios-toggle::after{content:"";position:absolute;top:2px;right:2px;width:calc(1.5rem - 4px);height:calc(1.5rem - 4px);border-radius:50%;background:#fff}
+.ios-add{flex:none;justify-content:center;min-height:2.25rem;padding:0 .95rem;border-radius:99px;background:#0A84FF;font-weight:600}
+.is-target{box-shadow:0 0 0 2px var(--banana)}
+
 /* The inset follows the same 45° cut at a constant perpendicular distance. */
 :is(.btn,.primary-button,.pick,.choice,.card,.ans,.chip,.shortcut-offer) {
   --cut:var(--cut-l);

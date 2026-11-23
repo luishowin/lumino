@@ -5,7 +5,7 @@ import { LESSONS, RIVALS, TROPHIES, TUTORS, TUTOR_HELP } from './lumino-app/cont
 import { LEVELS, SUBJECTS, subjectById, topicById } from './lumino-app/curriculum.mjs?v=34';
 import { drawSky, hydrate, spr, uiIcon } from './lumino-app/pixel-art.mjs?v=31';
 import { boostRemaining, clearProgress, completeLesson, currentStreak, freshProgress, loadProgress, localDay, recordAnswer, saveProgress, startDailyBoost, weakSkills } from './lumino-app/progress.mjs?v=60';
-import { displayName, escapeHTML, mountProfile } from './lumino-app/profile.mjs?v=60';
+import { displayName, escapeHTML, mountProfile } from './lumino-app/profile.mjs?v=66';
 import { bindWorkshop, workshopMarkup } from './lumino-app/cart-workshop.mjs?v=34';
 import { drawDistanceGraph, getPracticeSession, MOTION_SKILLS, motionSkillFor } from './lumino-app/physics-motion.mjs?v=59';
 import { CART_ID, centerCurrentLesson, currentLesson, drawRoadmap, mapMarkup, roadmapBands } from './lumino-app/roadmap.mjs?v=62';
@@ -14,9 +14,6 @@ import { createMockTutor } from './lumino-app/tutor-client.mjs?v=59';
 
 const stage = document.querySelector('#stage');
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
-const sections = [
-  ['learn', 'Learn'], ['practise', 'Practise', 'bolt'], ['ranks', 'Ranks', 'trophy'], ['you', 'You'],
-];
 
 let storage;
 try { storage = window.localStorage; } catch {}
@@ -653,6 +650,9 @@ function bindLearningReminder(body) {
 }
 
 function home(tab) {
+  const sections = [
+    ['learn', 'Learn'], ['practise', 'Practise', 'bolt'], ['ranks', 'Ranks', 'trophy'], ['you', 'You', `avatar-${state.profile.avatar}`],
+  ];
   const [, label, icon = tab] = sections.find(([id]) => id === tab);
   const node = mount(`<div class="home${tab === 'learn' ? ' has-roadmap' : ''}">
     <header class="topbar"><a class="brand" href="../"><img class="mark sm" src="../assets/lumino-icon-192.png?v=46" alt="">Lumino</a>
@@ -928,6 +928,11 @@ function ranksTab(body) {
 function youTab(body) {
   mountProfile(body, {
     state, tutor, tutorChoices, bindTutorChoices, persist, applyPreferences, renderShortcut,
+    onAvatarChange: src => {
+      for (const icon of stage.querySelectorAll('[data-tab="you"] img, [data-expand-dock] img')) {
+        icon.src = src;
+      }
+    },
     openSubject: subject => chooseTopic(subject, 'you'),
     reset: status => {
       if (!window.confirm('Erase your Lumino progress and profile preferences on this device, including prior achievements?')) return;

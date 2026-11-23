@@ -1,4 +1,4 @@
-import { escapeHTML as esc } from './profile.mjs?v=60';
+import { escapeHTML as esc } from './profile.mjs?v=66';
 
 export const sections = ['Introduction', 'Goal', 'Definitions', 'Concept', 'Examples', 'Test', 'Summary', 'Sandbox'];
 

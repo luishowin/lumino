@@ -113,7 +113,7 @@ function settingsMarkup(profile, tutorName) {
     ${section('Privacy', switchRow('league', 'Show my sample league entry', profile.league, 'Show your nickname and XP in the example scores on this device.'))}`;
 }
 
-export function mountProfile(body, { state, tutor, tutorChoices, bindTutorChoices, persist, applyPreferences, openSubject, reset, renderShortcut }) {
+export function mountProfile(body, { state, tutor, tutorChoices, bindTutorChoices, persist, applyPreferences, openSubject, reset, renderShortcut, onAvatarChange }) {
   const profile = state.profile;
 
   function render(panel, focusSelector) {
@@ -146,6 +146,7 @@ export function mountProfile(body, { state, tutor, tutorChoices, bindTutorChoice
       profile.avatar = button.dataset.avatarColour;
       for (const item of choices) item.setAttribute('aria-pressed', String(item === button));
       avatar.src = button.querySelector('img').src;
+      onAvatarChange(avatar.src);
       persist();
     });
     for (const button of body.querySelectorAll('[data-profile-subject]')) {
